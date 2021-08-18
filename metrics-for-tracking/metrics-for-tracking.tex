@@ -1,0 +1,68 @@
+\documentclass[slidestop,mathserif]{beamer}
+
+% \mode<presentation>
+% {
+% 	\usetheme{Warsaw}
+% 	\setbeamercovered{transparent}
+% }
+
+\mode<presentation>{
+	\usetheme{Berlin}
+	\setbeamercovered{transparent}
+	\usefonttheme{professionalfonts}
+}
+
+\usepackage{amsmath, amsfonts, amssymb}
+
+\newcommand{\norm}[1]{\left\|#1\right\|}
+
+\AtBeginSection[]
+{
+   \begin{frame}
+       \tableofcontents[currentsection]
+   \end{frame}
+}
+
+%% want to use verbatim: \begin{frame}[fragile]
+
+\title[Metrics for Tracking]{Metrics for Trackings: {\small Evaluations and Comparisons}}
+\author[chy1010]{\small Chien, Hung-Yu (chy1010) \\ {\scriptsize\tt andy1010@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+    \frame{\titlepage}
+
+    % \section[Outline]{}
+    % \begin{frame}
+    %     \frametitle{Outlines}
+    %     \tableofcontents
+    % \end{frame}
+
+    \section{MOT (multiple objects tracking)}
+
+    \begin{frame}
+        \frametitle{Multiple Object Tracking}
+
+        Given an input video, the task of multiple object tracking consists of the following parts:
+        \begin{itemize}
+        \item locating multiple objects,
+        \item maintaining their identities, and
+        \item yielding their individual trajectories.
+        \end{itemize}
+
+        % Here we only focus on objects of only one category. Multiple objects can also be viewed as different
+        % parts of a single object.
+
+        % As a mid-level task in computer vision, multiple object tracking grounds in
+        % high-level tasks such as action recognition, pose estimation and behaviour analysis.
+
+        % Compared with single object tracking (SOT), MOT requires to determine the number of objects and maintain
+        % their identities. Furthermore, MOT usually has more issues such as
+        % {\bf occlusions} and {\bf initialization and termination of tracks}.
+
+
+
+    \end{frame}
+
+\end{document} 
