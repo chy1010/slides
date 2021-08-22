@@ -47,12 +47,12 @@
     \tableofcontents
 \end{frame}
 
-\section{Preliminaries}
+\section{Before Evaluation: Matching in Different Levels}
 
 \begin{frame}
 	\frametitle{MOT (Multiple Object Tracking)}
 	
-	Given a video, the task of MOT consists of the following parts:
+	Given a video, the task of MOT consists of 
 	\begin{itemize}
 		\item locating multiple objects,
 		\item maintaining their identities, and
@@ -60,58 +60,33 @@
 	\end{itemize}
 	
 	In more details, \emph{each object is assigned a unique id in a frame.}
-	And objects with the same id in consecutive frames form a trajectory.
+	And \emph{objects with the same id in consecutive frames form a trajectory}.
 	
 	\begin{figure}
 		\includegraphics[height=70pt]{pics/fig1.png}
-		\caption{objects with the same id from different frames}
+		\caption{Objects with the same id from different frames form trajectories.}
 	\end{figure}
 	
 \end{frame}
 
 \begin{frame}
-	\frametitle{To Evaluate the MOT Results}
+	\frametitle{Matching in Different Levels}
 	
-	Whatever how we perform tracking the same objects in a sequence of frames.
-	New nominal ids are assigned to detected objects in every frames.
-	
-	Hence to compare the results with the ground-truth data, we need to match the new ids
+	Whatever how we perform trackings,
+	new nominal ids are assigned to detected objects in every frames.
+	Hence to compare the results, we need to match the new ids
 	with the original ids.
+
+	\quad
 	
 	The matchings are done in different levels such as:
 	\begin{itemize}
-		\item {\bf frame levels / detection levels}:
+		\item {\bf framewisely / detection levels}:
 		      match ground-truth objects (denoted by gtDets)
 		      with predictions (denoted by prDets) frame by frame.
-		\item {\bf sequence levels / trajectory levels}:
+		\item {\bf sequentially / trajectory levels}:
 		      match each ground-truth id to an hypothesis id along a sequence of frames.
 	\end{itemize}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Matching in Frame-Levels}
-	
-	Here a {\bf matching} is a \emph{1-1 relation} between ground-truths
-	and predictions in the same frame.
-	It can be done by according to the {\bf similarities} of every `gt-pred' pair.
-	For example, $\max\{1-\text{\tt dist}, 0\}$ and {\tt IoU} are metrics for
-	measuring similarity, which is in $[0,1]$.
-	
-	\vspace{4pt}
-	
-	Denote $\mathcal S(g_i, p_j)$ be the similarity score of $i$-th ground-truth object
-	and $j$-th prediction. Let $\alpha\in(0,1)$.
-	Then a matching $\Pi$ under the similarity threshold $\alpha$ is a 1-1 relation
-	satisfying
-	\[
-		(g,p) \in \Pi \Rightarrow \mathcal S(g, p) \geq \alpha. ~ \text{($g$, $p$ must belong the same frame.)}
-	\]
-	
-	% \vspace{2pt}
-	
-	\emph{1-1 relation: if $(g_i, p_j)$, $(g_k, p_\ell)\in \Pi$,
-		then $i=k$ $\Leftrightarrow$ $j=\ell$.}
 	
 \end{frame}
 
@@ -120,7 +95,7 @@
 	
 	\begin{itemize}
 		\item Denote $F:=\{f_0, f_1, \ldots, f_{N-1}\}$ as the set of frames.
-		\item If $\Pi$ is a matching, it can be a matching in a frame $f$ and specified by $\Pi^{(f)}$;
+		\item If $\Pi$ is a framewise matching, it can be a matching in a frame $f$ and specified by $\Pi^{(f)}$;
 		      or be a matching during all frames.
 		\item When $\Pi$ denotes a global matching, it is the union of all its sections:
 		      $\Pi = \cup_{f\in F}\Pi^{(f)}$.
@@ -137,22 +112,41 @@
 	\end{itemize}
 \end{frame}
 
+\subsection{Matching in Detection Levels}
+
 \begin{frame}
-	\frametitle{TP, FP and FN}
+	\frametitle{Matching in Detection Levels}
 	
-	For a given matching $\Pi$ during all frames, we can define:
-	\begin{itemize} \itemsep = 2pt
-		\item TP, $\text{TP}_\Pi$ (true positive cases): Matched pairs in $\Pi$.
-		\item FP, $\text{FP}_\Pi$ (false positive cases): Non-matched predictions.
-		\item FN, $\text{FN}_\Pi$ (false negative cases): Non-matched ground-truths.
-	\end{itemize}
+	To perform matching, similarity scores of any ground-truth and any prediction
+	are defined. For example, IoU and $\max\{1-\text{dist}, 0\}$ are often used,
+	where dist is the central distance.
 	
 	\begin{figure}
 		\includegraphics[width=120pt]{pics/fig2.png}
-		\caption{TP's, FP's, FN's in consecutive frames.}
+		\caption{Matchings, false positives and misses in consecutive frames.
+			Here the similarity is measured by the central distances.}
 	\end{figure}
 	
 \end{frame}
+
+\begin{frame}
+	\frametitle{Similarity Threshold and the Quantities TP, FN and FP}
+
+	To filter out bad matches, we may set a threshold $\alpha$.
+	Hence a matching under threshold $\alpha$, $\Pi_\alpha$, is a 1-1 relation between
+	ground-truths and predictions satisfying
+	\[
+		\mathcal S(g,p) \geq \alpha~~ \forall\ (g, p) \in \Pi_\alpha.
+	\]
+	where we denote the similarity score by $\mathcal S$.
+	Then we can define the quantities TP, FN, FP in detection levels.
+	\begin{itemize}
+	\item TP: matched pairs in a matching $\Pi_\alpha$.
+	\item FP: non-matched predictions.
+	\item FN: non-matched ground-truths.
+	\end{itemize}
+\end{frame}
+
 
 \begin{frame}
 	\frametitle{IDSW in Consecutive Frames}
@@ -172,17 +166,17 @@
 		\caption{The ids 3 \& 8 exchanges. 2 IDSW events.}
 	\end{figure}
 	    
-	    
 \end{frame}
 
+\subsection{Matching in Trajectory Levels}
+
 \begin{frame}
-	\frametitle{Matching in Sequence-Levels}
+	\frametitle{Matching in Trajectory Levels}
 	    
-	Matchings in sequence-levels are done by associating one ground-truth trajectory
+	Matchings here are done by associating one ground-truth trajectory
 	% ({\tt gtTraj})
-	to exactly one predictive trajectory
+	to one predictive trajectory.
 	% ({\tt prTraj})
-	along a sequence of frames.
 	Denote such matchings by swash fonts $\mathfrak P$.
 	    
 	\quad
@@ -191,8 +185,6 @@
 	% different levels: `mostly tracked' and `mostly lost'.
 	Note that \emph{the similarities of two trajectories still depend on the
 	framewise matching under some threshold.}
-	When most objects are matched, then we call it `mostly tracked';
-	Otherwise, we call it `mostly lost'.
 	% Here it is usually defined in a Jaccard index (IoU) way:
 	% \[
 	%     \mathcal S_{\rm tr}(\text{\scriptsize gtTraj}, \text{\scriptsize prTraj}, \Pi_\alpha) =
@@ -201,11 +193,11 @@
 	\begin{figure}
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=80pt]{pics/fig4.png}
+			\includegraphics[width=100pt]{pics/fig4.png}
 		\end{subfigure}%
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=70pt]{pics/fig5.png}
+			\includegraphics[width=90pt]{pics/fig5.png}
 		\end{subfigure}
 		\caption{Mostly tracked \& mostly lost.}
 	\end{figure}
@@ -216,14 +208,14 @@
 \begin{frame}
 	\frametitle{Similarity of Trajectories}
 	
-	To measure the similarity of trajectories, we need to evaluate the 
-	overlapping and non-overlapping parts of them.
+	The similarity scores of trajectories are measured
+	by counting overlapping and the rest parts of them.
 	
 	\vspace{4pt}
 	
 	Let $\mathfrak g$, $\mathfrak p$ be a pair of trajectories
 	and $\alpha$ be a (detection-) similarity threhold.
-	We can define $\mathcal{TP}$'s, $\mathcal{FP}$'s, and $\mathcal{FN}$'s for overlapping of trajectories.
+	We can also define the analogues:
 	\begin{itemize}
 		\item $\mathcal{TP}$, $\mathcal{TP}_{\mathfrak g, \mathfrak p}$:
 		      the overlapping part of $\mathfrak g$ and $\mathfrak p$.
@@ -231,13 +223,13 @@
 		      	\mathcal{TP} := \{(g,p)\ |\ 
 		      	g\in\mathfrak g,~
 		      	p\in\mathfrak p,~
-		      	f_g=f_p,~ \mathcal S(g,p)\geq \alpha\}
+		      	\text{$g$, $p$ in the same frame},~ \mathcal S(g,p)\geq \alpha\}
 		      \]
 		\item $\mathcal{FP}$, $\mathcal{FP}_{\mathfrak g, \mathfrak p}$:
 		      the non-matched predictions.
 		      \begin{align*}
 		      	\mathcal{FP} := & \{ p\in\mathfrak p\ |\ 
-		      	\nexists\ g\in\mathfrak g ~\suchthat~ \mathcal S(g,p)\geq\alpha.\}
+		      	\nexists\ g\in\mathfrak g ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ \text{$g$, $p$ in the same frame}.\}
 		      \end{align*}
 	\end{itemize}
 	
@@ -250,11 +242,11 @@
 		\item $\mathcal{FN}$, $\mathcal{FN}_{\mathfrak g, \mathfrak p}$: the non-matched ground-truth objects.
 		      \begin{align*}
 		      	\mathcal{FN} := & \{ g\in\mathfrak g\ |\ 
-		      	\nexists\ p\in\mathfrak p ~\suchthat~ \mathcal S(g,p)\geq\alpha.\}
+		      	\nexists\ p\in\mathfrak p ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ \text{$g$, $p$ in the same frame}.\}
 		      \end{align*}
 	\end{itemize}
 	
-	Hence the similarity is defined in a Jaccard index way:
+	The similarity of trajectories is defined by
 	\[
 		\mathcal S_{\rm tr}(\mathfrak g, \mathfrak p) :=
 		\dfrac{|\mathcal{TP}_{\mathfrak g,\mathfrak p}|}{
@@ -328,6 +320,8 @@
 	\end{align*}
 \end{frame}
 
+\subsection{Associations of Ids}
+
 \begin{frame}
 	\frametitle{Problems in Matching Trajectories}
 	
@@ -379,7 +373,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Measures for Associations}
+	\frametitle{Measures for Associations of Objects}
 	
 	Similarly, for the TP pair $c = (g, p)$, we also define the false positive associations
 	and false negative associations as follows.
@@ -412,6 +406,14 @@
 	
 \end{frame}
 
+\begin{frame}
+	\frametitle{Measures for Associations of Objects}
+	\begin{figure}
+		\includegraphics[width=220pt]{pics/fig8.png}
+		\caption{For the interested object (red box), TPA: 5; FPA: 4; FNA: 3.}
+	\end{figure}
+\end{frame}
+
 % \begin{frame}
 %     In the next section,
 %     we'll introduce metrics for measuring tracking results
@@ -419,7 +421,7 @@
 
 % \end{frame}
 
-\section{Metrics for Measuring Tracking Results}
+\section{Evaluation Metrics for Measuring Tracking Results}
 
 \begin{frame}
 	\frametitle{Metrics for Measuring Tracking Results}
@@ -440,7 +442,7 @@
 \subsection{CLEAR-MOT: MOTA and MOTP}
 
 \begin{frame}
-	\frametitle{CLEAR-MOT: MOTA and MOTP}
+	\frametitle{MOTA and MOTP}
 	
 	% {\scriptsize\tt K. Bernardin \& R. Stiefelhagen, Evaluating Multiple Object Tracking Performance:%
 	% The CLEAR MOT Metrics.}
