@@ -31,6 +31,13 @@
    \end{frame}
 }
 
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
 %% want to use verbatim: \begin{frame}[fragile]
 
 \title[Metrics for Tracking]{Metrics for Trackings: Evaluations and Comparisons}
@@ -47,7 +54,7 @@
     \tableofcontents
 \end{frame}
 
-\section{Before Evaluation: Matching in Different Levels}
+\section{Matchings and Associations}
 
 \begin{frame}
 	\frametitle{MOT (Multiple Object Tracking)}
@@ -70,14 +77,16 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Matching in Different Levels}
+	\frametitle{Matching / Association in Different Levels}
 	
-	Whatever how we perform trackings,
-	new nominal ids are assigned to detected objects in every frames.
-	Hence to compare the results, we need to match the new ids
+	% Whatever how we perform trackings,
+	% new nominal ids are assigned to detected objects in every frames.
+	% Hence to compare the results, we need to match the new ids
+	% with the original ids.
+	To compare the results, we need to match the new ids
 	with the original ids.
 
-	\quad
+	\vspace{4pt}
 	
 	The matchings are done in different levels such as:
 	\begin{itemize}
@@ -86,7 +95,12 @@
 		      with predictions (denoted by prDets) frame by frame.
 		\item {\bf sequentially / trajectory levels}:
 		      match each ground-truth id to an hypothesis id along a sequence of frames.
+		\item {\bf associations of trajectories}:
+			associate ground-truth ids with several non-overlapping preditive trajectories.
 	\end{itemize}
+
+	% To give some partial credits to some peices of trajectories,
+	% we may also associate the ground-truth ids with preditive ids (not 1-1 relation).
 	
 \end{frame}
 
@@ -117,9 +131,11 @@
 \begin{frame}
 	\frametitle{Matching in Detection Levels}
 	
-	To perform matching, similarity scores of any ground-truth and any prediction
-	are defined. For example, IoU and $\max\{1-\text{dist}, 0\}$ are often used,
-	where dist is the central distance.
+	% To perform matching, similarity scores of any ground-truth and any prediction
+	% are defined. For example, IoU and $\max\{1-\text{dist}, 0\}$ are often used,
+	% where dist is the central distance.
+	In detection levels, scoring functions such as $\max\{1-\text{dist}, 0\}$ and IoU
+	are often used to measure similarities, where dist is the central distance.
 	
 	\begin{figure}
 		\includegraphics[width=120pt]{pics/fig2.png}
@@ -132,19 +148,19 @@
 \begin{frame}
 	\frametitle{Similarity Threshold and the Quantities TP, FN and FP}
 
+	Denote the similarity function by $\mathcal S$.
 	To filter out bad matches, we may set a threshold $\alpha$.
-	Hence a matching under threshold $\alpha$, $\Pi_\alpha$, is a 1-1 relation between
-	ground-truths and predictions satisfying
+	Once a matching $\Pi_\alpha$ under threshold $\alpha$ is done, it satisfies
 	\[
-		\mathcal S(g,p) \geq \alpha~~ \forall\ (g, p) \in \Pi_\alpha.
+			\forall\ (g,p)\in\Pi_\alpha, ~ \mathcal S(g,p) \geq \alpha.
 	\]
-	where we denote the similarity score by $\mathcal S$.
 	Then we can define the quantities TP, FN, FP in detection levels.
 	\begin{itemize}
 	\item TP: matched pairs in a matching $\Pi_\alpha$.
 	\item FP: non-matched predictions.
 	\item FN: non-matched ground-truths.
 	\end{itemize}
+	Remark: there may be several matchings fulfilling the similarity threshold.
 \end{frame}
 
 
@@ -173,11 +189,13 @@
 \begin{frame}
 	\frametitle{Matching in Trajectory Levels}
 	    
-	Matchings here are done by associating one ground-truth trajectory
-	% ({\tt gtTraj})
-	to one predictive trajectory.
-	% ({\tt prTraj})
-	Denote such matchings by swash fonts $\mathfrak P$.
+	% Matchings here are done by associating one ground-truth trajectory
+	% % ({\tt gtTraj})
+	% to one predictive trajectory.
+	% % ({\tt prTraj})
+	% Denote such matchings by swash fonts $\mathfrak P$.
+
+	Matchings here are constructing 1-1 relation between ground-truth ids and preditive ids.
 	    
 	\quad
 	
@@ -208,12 +226,12 @@
 \begin{frame}
 	\frametitle{Similarity of Trajectories}
 	
-	The similarity scores of trajectories are measured
-	by counting overlapping and the rest parts of them.
+	Similarity scores here are measured
+	by counting overlapping and the rest parts of each pair of trajectories.
 	
-	\vspace{4pt}
+	\vspace{5pt}
 	
-	Let $\mathfrak g$, $\mathfrak p$ be a pair of trajectories
+	Let $\mathfrak g$, $\mathfrak p$ be a pair
 	and $\alpha$ be a (detection-) similarity threhold.
 	We can also define the analogues:
 	\begin{itemize}
@@ -223,13 +241,13 @@
 		      	\mathcal{TP} := \{(g,p)\ |\ 
 		      	g\in\mathfrak g,~
 		      	p\in\mathfrak p,~
-		      	\text{$g$, $p$ in the same frame},~ \mathcal S(g,p)\geq \alpha\}
+		      	f_g=f_p,~ \mathcal S(g,p)\geq \alpha\}
 		      \]
 		\item $\mathcal{FP}$, $\mathcal{FP}_{\mathfrak g, \mathfrak p}$:
 		      the non-matched predictions.
 		      \begin{align*}
 		      	\mathcal{FP} := & \{ p\in\mathfrak p\ |\ 
-		      	\nexists\ g\in\mathfrak g ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ \text{$g$, $p$ in the same frame}.\}
+		      	\nexists\ g\in\mathfrak g ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ f_g=f_p.\}
 		      \end{align*}
 	\end{itemize}
 	
@@ -242,7 +260,7 @@
 		\item $\mathcal{FN}$, $\mathcal{FN}_{\mathfrak g, \mathfrak p}$: the non-matched ground-truth objects.
 		      \begin{align*}
 		      	\mathcal{FN} := & \{ g\in\mathfrak g\ |\ 
-		      	\nexists\ p\in\mathfrak p ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ \text{$g$, $p$ in the same frame}.\}
+		      	\nexists\ p\in\mathfrak p ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ f_p=f_g.\}
 		      \end{align*}
 	\end{itemize}
 	
@@ -251,17 +269,18 @@
 		\mathcal S_{\rm tr}(\mathfrak g, \mathfrak p) :=
 		\dfrac{|\mathcal{TP}_{\mathfrak g,\mathfrak p}|}{
 			|\mathcal{TP}_{\mathfrak g,\mathfrak p}|+|\mathcal{FP}_{\mathfrak g,\mathfrak p}|+|\mathcal{FN}_{\mathfrak g,\mathfrak p}|
-		}.
+		}
 	\]
+	where $|\cdot|$ here denotes the cardinality of a set.
 	Once the similarities are calculated,
-	the matching of trajectories can be done by considering the similarities.
+	the matching of trajectories can be done by Hungarian algorithms.
 \end{frame}
 
 
 \begin{frame}
 	\frametitle{Measures for Id Tracking: IDTP, IDFP, IDFN}
 	
-	Suppose a matching between ground-truths and predictions are done and denoted by $\mathfrak P$,
+	Suppose a matching of trajectories are done and denoted by $\mathfrak P$,
 	we can define the performance measures as follows.
 	
 	\vspace{4pt}
@@ -277,8 +296,8 @@
 		\text{IDTP} := \left\{ (g,p)\ |\ 
 		g\in\mathfrak g, ~ p\in\mathfrak p, ~
 		f_g=f_p, ~ 
-		\mathcal S(g,p) \geq \alpha\ 
-		\forall\ (\mathfrak g, \mathfrak p)\in\mathfrak P
+		\mathcal S(g,p) \geq \alpha, ~ 
+		(\mathfrak g, \mathfrak p)\in\mathfrak P
 		\right\}
 	\]
 	\vspace{-10pt}
@@ -293,6 +312,8 @@
 \begin{frame}
 	\frametitle{Measures for Id Tracking: IDTP, IDFP, IDFN}
 	    
+	\vspace{-10pt}
+
 	\begin{align*}
 		\text{IDFP} := & \left\{ p\in\text{prDets}\ \left|\                                                
 		\mathcal S(g,p)<\alpha, \ 
@@ -318,46 +339,48 @@
 		\right\} \\
 		               & \bigcup \left\{g \in \text{gtDets}\ |\ \text{gtTraj$(g)$ is not matched}\right\}. 
 	\end{align*}
+	Later we'll see these terms in the definitions of metrics.
 \end{frame}
 
-\subsection{Associations of Ids}
+\subsection{Associations of Tracked Ids}
 
 \begin{frame}
 	\frametitle{Problems in Matching Trajectories}
 	
 	\begin{itemize}
 		\item {\bf fragmentations}:
-		      A ground-turth trajectory may be matched
-		      to several predictive trajectories.
+		      A ground-turth trajectory is tracked by
+			  several predictive trajectories.
 		\item {\bf merge}:
-		      A preditive trajectory may be matched to several ground-truth trajectories.
+		      A tracker is matched to several ground-truths.
 	\end{itemize}
-	In both cases, the tracking results are good enough peicewisely,
-	but id mismatches occur at several frames.
-	Matching in sequence levels only allows 1-1 relation
-	between the two kinds of trajectories.
-	
-	\vspace{4pt}
-	
-	Hence in the following, we have some quantities to measure
-	the overlapping of trajectories in the detection levels.
-	This aims to give some partial credits to non-matched good trackers.
+
+	\begin{figure}
+		\includegraphics[width=100pt]{pics/fig9.png}
+		\caption{Six objects with colors being diff. ids and dash lines being misses.}
+	\end{figure}
+
+	\vspace{-15pt}
+	It's a drawback that trajectory matching only allows 1-1 relation.
+	% Hence in the following, we have some quantities to measure
+	% the overlapping of trajectories in the detection levels.
+	% This aims to give some partial credits to non-matched good trackers.
 	
 \end{frame}
 
 \begin{frame}
 	\frametitle{Measures for Associations of Objects}
 	
-	By the concepts of matching in sequence-levels,
-	we can further evaluate {\bf tracking associations of an single object}
-	along its ground-truth trajectory and predictive trajectory.
-	{\color{red} Here the TP's, FP's and FN's are determined in framewise detection levels.}
+	By concepts in trajectory / id matchings,
+	{\bf tracking associations of an single object} is developed in further.
+	\emph{Do matching in detection levels and associate multiple ids by matching.}
+	% {\color{red} Here the TP's, FP's and FN's are determined in framewise detection levels.}
 	
 	\vspace{4pt}
 	
-	Given a frame-level matching $\Pi$.
-	Let $c = (g,p)$ be a TP pair in some frame $t$. We can define the true positive
-	associations by:
+	Given a framewise matching $\Pi_\alpha$.
+	Let $c = (g,p)$ be a TP pair in a frame $t$.
+	We define TPA, FPA and FNA as follows.
 	\begin{align*}
 		\text{TPA}(c) :=                       
 		\left\{(g_i, p_j)\in\text{TP}\ \left|\ 
@@ -375,8 +398,9 @@
 \begin{frame}
 	\frametitle{Measures for Associations of Objects}
 	
-	Similarly, for the TP pair $c = (g, p)$, we also define the false positive associations
-	and false negative associations as follows.
+	% Similarly, for the TP pair $c = (g, p)$, we also define the false positive associations
+	% and false negative associations as follows.
+	\vspace{-20pt}
 	\begin{align*}
 		\text{FPA}(c) := &             
 		\left\{(g_i, p_j)\in\text{TP}\ \left|\ 
@@ -403,6 +427,8 @@
 	\end{align*}
 	Note that $\text{FPA}(c)$ and $\text{FNA}(c)$ relate to the non-matched or id-mismatched
 	objects in $\text{prTraj}(p)$ and $\text{grTraj}(g)$.
+
+	Later we'll see these terms in the definitions of HOTA metrics.
 	
 \end{frame}
 
@@ -430,7 +456,7 @@
 	
 	\quad 
 	
-	To measure the results, the metrics often consists of the following aspects
+	To measure the results, metrics often consists of the following aspects
 	\begin{itemize}
 		\item detection;%: measure accuracies of predictions
 		\item localization;%: measure accuracies of positions of correct predictions
@@ -449,9 +475,10 @@
 	
 	Given a similarity threshold $\alpha$.
 	
-	\quad
+	\vspace{4pt}
 	
-	{\bf MOTA (multiple object tracking accuracy)} is calculated through optimizing the value
+	{\bf MOTA (multiple object tracking accuracy)} is calculated through
+	\emph{optimizing the value}
 	\[
 		\text{MOTA}_\alpha :=
 		\max_{\Pi_\alpha}
@@ -459,11 +486,14 @@
 	\]
 	among all matchings $\Pi_\alpha$ with $\mathcal S(c)\geq \alpha$ for all matched $c\in\Pi_\alpha$.
 	
-	\quad
+	\vspace{4pt}
 	
-	Note that here the matching is done in frame-levels.
-	{\bf\color{blue} FN, FP terms measure the accuracy of detections.}
-	{\bf\color{olive} The IDSW term measures the accuracy of id-associations.}
+	{\bf\color{blue} FN, FP terms affect the accuracy of detections.} \\
+	{\bf\color{olive} The IDSW term affects the accuracy of id-associations.}
+	
+	\vspace{4pt}
+
+	Remark: under $\alpha$, the matching is taken to optimize $|\text{TP}|$ as well.
 	
 \end{frame}
 
@@ -476,14 +506,19 @@
 		\text{MOTP}_\alpha =
 		\dfrac{\sum_{(g,p)\in\text{TP}_{\Pi_\alpha}}\mathcal S(g,p)}{|\text{TP}_{\Pi_\alpha}|}.
 	\]
+	{\bf\color{red} MOTP measures the accuracy of localizations of predictions}.
 	
-	\quad 
-	
-	Note that {\bf\color{red} MOTP measures the accuracy of localizations of predictions}.
+	\vspace{4pt}
 	
 	By direct observations, if the MOTA value is low,
 	then somehow it cannot be distinguished that
 	the detections are not good or the tracking results are not good.
+	
+	\vspace{5pt}
+
+	$\alpha\nearrow$ $\Rightarrow$ $|\text{FN}|, |\text{FP}|, \mathcal S \nearrow$, $|\text{TP}| \searrow$ $\Rightarrow$ MOTP $\nearrow$.
+	$|\text{IDSW}|, \text{MOTA}$ $?$
+
 	
 	
 \end{frame}
@@ -537,12 +572,12 @@
     \frametitle{The HOTA metrics}
 
     The HOTA score for a particular similarity threshold $\alpha$ is defined by
-    optimizing among matchings in detection levels:
+    optimizing the following value among matchings in detection levels:
     \[
         \text{HOTA}_\alpha := 
         \max_{\Pi_\alpha} \sqrt{\dfrac{\sum_{c\in\text{TP}} \mathcal A(c) }{|\text{TP}|+|\text{FN}|+|\text{FP}|}},
     \]
-    where $\mathcal A(c)$ is the accuracy of association of a single object:
+    where $\mathcal A(c)$ is the {\bf association score of a single pair of ids}:
     \[
         \mathcal A(c) = \dfrac{|\text{TPA}(c)|}{|\text{TPA}(c)|+|\text{FPA}(c)|+|\text{FNA}(c)|}.
     \]
