@@ -122,7 +122,7 @@
 		it assigns the same id to the same object in the consecutive frames.
 	\end{itemize}
 
-	\vspace{-10pt}
+	\vspace{-8pt}
 
 	\begin{figure}
 		\begin{subfigure}{.48\textwidth}
@@ -224,7 +224,7 @@
 		      		      		      
 	\end{itemize}
 			
-	\vspace{-5pt}
+	\vspace{-2pt}
 
 	For a ground-truths $g$ or a prediction $p$, denote
 	\begin{itemize}
@@ -261,7 +261,7 @@
 	Usual tracking errors consist of:
 	\begin{itemize}
 	\item \emph{an id switch event}, or that
-	\item \emph{an object is out of detection}.
+	\item \emph{an object is out of detection}, or a \emph{wrong prediction}.
 	\end{itemize}
 
 	Here we introduce a metric MOTA (multiple obejct tracking accuracy)
@@ -292,11 +292,13 @@
 	\frametitle{Discussion on MOTA}
 
 	\begin{itemize}
-	\item Which hypothesis id is matched to ground-truth id for most frames?
+	\item During the matching process, which hypothesis id is matched to ground-truth id for most frames?
 	\item When MOTA is much lower from $1$, we don't know either detectors or tracking result is worse.
 	\item Sometimes IDSW can't help distinguish the exchange of two ids or
 		losing and re-tracking an object with id.
 	\end{itemize}
+
+	\vspace{5pt}
 
 	In the following, matching in trajectory levels is investigated.
 	% \begin{itemize}
@@ -320,11 +322,12 @@
 		\end{subfigure}%
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=120pt]{pics/fig5.png}
+			\includegraphics[width=115pt]{pics/fig5.png}
 		\end{subfigure}
 		\caption{Mostly tracked \& mostly lost.}
 	\end{figure}
 
+	\vspace{-5pt}
 	Since one trajectory can be likely to match two or more trajectories,
 	the similarity scores between trajectories are defined
 	and they depend on the similarity scores in detection levels.
