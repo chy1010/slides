@@ -70,7 +70,7 @@
 	\end{itemize}
 
 	\begin{figure}
-		\includegraphics[width=.95\textwidth]{pics/track01.png}
+		\includegraphics[width=1.05\textwidth]{pics/track01.png}
 		\caption{Predict \& track objects on continuous frames.}
 	\end{figure}
 
@@ -115,13 +115,14 @@
 \begin{frame}
 	\frametitle{MOT (Multiple Object Tracking)}
 
-	A tracker is {\bf good} if
+	How to evaluate a tracker? We think a tracker is {\bf good} if
 	\begin{itemize}
 	\item it detects objects correctly;
 	\item
-		it assigns ids to all detections,
-		and it assigns the same id to the same object in the following frames.
+		it assigns the same id to the same object in the consecutive frames.
 	\end{itemize}
+
+	\vspace{-10pt}
 
 	\begin{figure}
 		\begin{subfigure}{.48\textwidth}
@@ -130,16 +131,14 @@
 		\begin{subfigure}{.48\textwidth}
 		\includegraphics[width=150pt]{pics/track04.jpg}
 		\end{subfigure}
-		\caption{NG cases: Fail to track the id 2. Wrong detection (the id 5).}
+		\caption{{\color{red}\bf [NG cases]} Fail to track the id 2. Wrong detection (the id 5).}
 	\end{figure}
 
 	\vspace{-15pt}
-	To compare the ground-truths and predictions, we should match different objects
-	and see if they are correctly tracked.
-
+	To see if the predictions are correct, we match objects to the ground-truth
+	and see further if they are correctly tracked.
 
 \end{frame}
-
 
 \section{Matchings and Associations}
 
@@ -151,49 +150,29 @@
 		
 	\vspace{4pt}
 			
-	The matchings are done in different levels such as:
+	The matchings are executed in different levels such as:
 	\begin{itemize}
-		\item {\bf framewisely / detection levels}:
-		      match ground-truth objects (denoted by gtDets)
-		      with predictions (denoted by prDets) frame by frame.
-		\item {\bf sequentially / trajectory levels}:
-		      match each ground-truth id to an hypothesis id along a sequence of frames.
+		\item {\bf matching in detection levels}:
+		      match ground-truth objects (gtDets)
+		      with predictions (prDets) frame by frame.
+		\item {\bf matching in trajectory levels}:
+		      match each \emph{ground-truth id} to a \emph{hypothesis id}
+			  along a sequence of frames.
 		\item {\bf associations of trajectories}:
-		      associate ground-truth ids with several non-overlapping preditive trajectories.
+		      associate all ground-truth ids with several non-overlapping preditive trajectories.
 	\end{itemize}
 		
 	% To give some partial credits to some peices of trajectories,
 	% we may also associate the ground-truth ids with preditive ids (not 1-1 relation).
 
-	Note that the ids are nominal values. Ground-truth ids may not have any coincidence
-	with the tracker ids.
-	The matching is done according to pre-defined \emph{similarity scores}.
+	% The ids are nominal values. 
+	% Ground-truth ids may not have any coincidence with the tracker ids.
+	All these kinds of matchings can be done according to some pre-defined \emph{similarity scores}.
+	Furthremore, there may have many possibilities of matchings.
 			
 \end{frame}
 
-\begin{frame}
-	\frametitle{Trivial Notions}
-			
-	\begin{itemize}
-		\item Denote $F:=\{f_0, f_1, \ldots, f_{N-1}\}$ as the set of frames.
-		\item If $\Pi$ is a framewise matching, it can be a matching in a frame $f$ and specified by $\Pi^{(f)}$;
-		      or be a matching during all frames.
-		\item When $\Pi$ denotes a global matching, it is the union of all its sections:
-		      $\Pi = \cup_{f\in F}\Pi^{(f)}$.
-		\item Furthermore, once a collection $E$ is well-defined in each frame,
-		      we denote $E^{(f)}$ as the $f$-section, i.e. elements in frame $f$.
-		      		      		      
-	\end{itemize}
-			
-	For a ground-truths $g$ or a prediction $p$, denote
-	\begin{itemize}
-		\item $f_g$ / $f_p$ as the frame it appears;
-		\item $\text{gtId}(g)$ / $\text{prId}(p)$ as its id;
-		\item $\text{gtTr}(g)$ / $\text{prTr}(p)$ as its trajectory (objects with the same id).
-	\end{itemize}
-\end{frame}
-
-\subsection{Matching in Detection Levels}
+\subsection{Matching in Detection Levels \& MOTA}
 
 \begin{frame}
 	\frametitle{Matching in Detection Levels}
@@ -201,12 +180,13 @@
 	% To perform matching, similarity scores of any ground-truth and any prediction
 	% are defined. For example, IoU and $\max\{1-\text{dist}, 0\}$ are often used,
 	% where dist is the central distance.
-	In detection levels, scoring functions such as $\max\{1-\text{dist}, 0\}$ and IoU
+	In detection levels, scoring functions such as $\max\{1-\text{dist}, 0\}$ or IoU
 	are often used to measure similarities, where dist is the central distance.
 			
+	\vspace{-10pt}
 	\begin{figure}
-		\includegraphics[width=120pt]{pics/fig2.png}
-		\caption{Matchings, false positives and misses in consecutive frames.
+		\includegraphics[width=150pt]{pics/fig2.png}
+		\caption{Matchings (1-1 relation), false positives and misses in consecutive frames.
 		Here the similarity is measured by the central distances.}
 	\end{figure}
 			
@@ -230,6 +210,30 @@
 	Remark: there may be several matchings fulfilling the similarity threshold.
 \end{frame}
 
+\begin{frame}
+	\frametitle{Notions}
+			
+	\begin{itemize}
+		\item $F:=\{f_0, f_1, \ldots, f_{N-1}\}$: the set of frames.
+		\item A matching $\Pi$ can be a matching in a frame $f$ and specified by $\Pi^{(f)}$;
+		      or be a matching during all frames.
+		\item When $\Pi$ denotes a global matching, it is the union of all its sections:
+		      $\Pi = \cup_{f\in F}\Pi^{(f)}$.
+		\item Furthermore, once a collection $E$ is well-defined in each frame,
+		      we denote $E^{(f)}$ as the $f$-section, i.e. elements in frame $f$.
+		      		      		      
+	\end{itemize}
+			
+	\vspace{-5pt}
+
+	For a ground-truths $g$ or a prediction $p$, denote
+	\begin{itemize}
+		\item $f_g$ / $f_p$ as the frame it appears;
+		\item $\text{gtId}(g)$ / $\text{prId}(p)$ as its id;
+		\item $\text{gtTr}(g)$ / $\text{prTr}(p)$ as its trajectory.
+	\end{itemize}
+
+\end{frame}
 
 \begin{frame}
 	\frametitle{IDSW in Consecutive Frames}
@@ -251,41 +255,79 @@
 			    
 \end{frame}
 
-\subsection{Matching in Trajectory Levels}
+\begin{frame}
+	\frametitle{Tracking Accuracy: A First Meet.}
+
+	Usual tracking errors consist of:
+	\begin{itemize}
+	\item \emph{an id switch event}, or that
+	\item \emph{an object is out of detection}.
+	\end{itemize}
+
+	Here we introduce a metric MOTA (multiple obejct tracking accuracy)
+	to evaluate the tracker by calculating the number of errors:
+	\[
+		\text{MOTA} = 1 - \dfrac{|\text{FP}| + |\text{FN}| + |\text{IDSW}|}{|\text{gtDets}|}.
+	\]
+
+	The range of MOTA is $(-\infty,1]$. As FP, FN, IDSW increase, the MOTA value decrease.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Discussion on MOTA}
+
+	\begin{figure}
+		\begin{subfigure}{.49\textwidth}
+			\includegraphics[width=150pt]{pics/fig16.png}
+		\end{subfigure}
+		\begin{subfigure}{.49\textwidth}
+			\includegraphics[width=150pt]{pics/fig17.png}
+		\end{subfigure}
+		\caption{Cases of losing tracks.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Discussion on MOTA}
+
+	\begin{itemize}
+	\item Which hypothesis id is matched to ground-truth id for most frames?
+	\item When MOTA is much lower from $1$, we don't know either detectors or tracking result is worse.
+	\item Sometimes IDSW can't help distinguish the exchange of two ids or
+		losing and re-tracking an object with id.
+	\end{itemize}
+
+	In the following, matching in trajectory levels is investigated.
+	% \begin{itemize}
+	% \item The matching is also done according to similarity scores between trajectories.
+	% 	Again, there may be many possibilities.
+	% \item Similarity scores between trajectories still depend on matching in detection levels.
+	% \end{itemize}
+
+\end{frame}
+
+% \subsection{Matching in Trajectory Levels}
 
 \begin{frame}
 	\frametitle{Matching in Trajectory Levels}
-			    
-	% Matchings here are done by associating one ground-truth trajectory
-	% % ({\tt gtTraj})
-	% to one predictive trajectory.
-	% % ({\tt prTraj})
-	% Denote such matchings by swash fonts $\mathfrak P$.
-		
-	Matchings here are constructing 1-1 relation between ground-truth ids and preditive ids.
-			    
-	\quad
-			
-	% The similarity of a {\tt grTraj} and a {\tt prTraj} is often divided into
-	% different levels: `mostly tracked' and `mostly lost'.
-	Note that \emph{the similarities of two trajectories still depend on the
-	framewise matching under some threshold.}
-	% Here it is usually defined in a Jaccard index (IoU) way:
-	% \[
-	%     \mathcal S_{\rm tr}(\text{\scriptsize gtTraj}, \text{\scriptsize prTraj}, \Pi_\alpha) =
-	%         |\text{TP}| / (|\text{TP}|+|\text{FN}|+|\text{FP}|).
-	% \]
+
+	A sketch of a matched pair of trajectories.
 	\begin{figure}
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=100pt]{pics/fig4.png}
+			\includegraphics[width=130pt]{pics/fig4.png}
 		\end{subfigure}%
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=90pt]{pics/fig5.png}
+			\includegraphics[width=120pt]{pics/fig5.png}
 		\end{subfigure}
 		\caption{Mostly tracked \& mostly lost.}
 	\end{figure}
+
+	Since one trajectory can be likely to match two or more trajectories,
+	the similarity scores between trajectories are defined
+	and they depend on the similarity scores in detection levels.
 			
 \end{frame}
 
@@ -409,7 +451,7 @@
 	Later we'll see these terms in the definitions of metrics.
 \end{frame}
 
-\subsection{Associations of Tracked Ids}
+% \subsection{Associations of Tracked Ids}
 
 \begin{frame}
 	\frametitle{Problems in Matching Trajectories}
