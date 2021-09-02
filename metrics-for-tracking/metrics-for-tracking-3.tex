@@ -57,72 +57,90 @@
 \end{frame}
 
 
+\begin{frame}
+	\frametitle{What is a tracker?}
+
+	A {\bf tracker} is a \emph{model} or a \emph{post-processor}
+	that performs on a video, i.e. a sequence of image frames.
+
+	\quad
+
+	A tracker model is often used on MOT (multiple object tracking) tasks,
+	which consists of
+	\begin{itemize}
+	\item to detects objects inside each frames, and
+	\item
+		to recognizes if the detections in consecutive frames are the
+		same or not.
+	\end{itemize}
+
+	\quad
+
+	We also use the term `tracker' to indicate the recognization part
+	in particular. In this case, trackers are often seem as post-processors
+	in model pipelines.
+
+\end{frame}
+
+
 \section{Trackers and Multiple Object Tracking}
 
 \begin{frame}
-	\frametitle{MOT (Multiple Object Tracking)}
+	\frametitle{Inference Results of a Tracker}
 
-	For a video file or a video stream, the task of a tracker probably consists of
-	\begin{itemize}
-	\item locating objects,
-	\item maintaining their identities, and
-	\item yielding their individual trajectories.
-	\end{itemize}
+	Unlike SOT (single object tracking), MOT are mainly to deal with
+	multiple objects of the same category. And a tracker should assign
+	an identity to each detected object along a video file or a video
+	stream.
 
 	\begin{figure}
 		\includegraphics[width=1.05\textwidth]{pics/track01.png}
-		\caption{Predict \& track objects on continuous frames.}
+		\caption{Detect \& track objects on continuous frames.}
 	\end{figure}
 
 \end{frame}
 
 \begin{frame}
-	\frametitle{MOT (Multiple Object Tracking)}
-	
-	In more details, 
-	\begin{itemize}
-	\item each object is assigned a unique id in a frame;
-	\item objects with the same id in consecutive frames form a trajectory.
-	\end{itemize}
-	
-	\vspace{3pt}
+	\frametitle{Inference Results of a Tracker}
 
-	The following picture contains results in different frames.
-	
+	Finally, the inference results should \emph{locate objects},
+	\emph{maintain their ids},
+	and \emph{yield individual trajectories}.
+
 	\begin{figure}
-		\includegraphics[height=70pt]{pics/fig1.png}
+		\includegraphics[height=90pt]{pics/fig1.png}
 		\caption{Trajectories and several un-tracked / isolated predictions.}
 	\end{figure}
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{MOT (Multiple Object Tracking)}
-	
-	The {\bf ground-truths} for tracking objects in a video also consist of
-	\begin{itemize}
-	\item location of objects, and
-	\item their unique ids.
-	\end{itemize}
-
-	\begin{figure}
-		\includegraphics[width=.7\textwidth]{pics/track02.png}
-		\caption{Trajectories of the ground-truth pedestrians.}
-	\end{figure}
 
 \end{frame}
 
 \begin{frame}
-	\frametitle{MOT (Multiple Object Tracking)}
+	\frametitle{To Evaluate a Tracker}
 
-	How to evaluate a tracker? We think a tracker is {\bf good} if
+	To evaluate a tracker, we compare the inference results with ground-truths.
+
+	\quad
+
+	Similarly, the ground-truths also contain
 	\begin{itemize}
-	\item it detects objects correctly;
-	\item
-		it assigns the same id to the same object in the consecutive frames.
+	\item \emph{locations of objects} (denoted by gtObjs, gtDets) and
+	\item their \emph{identities}.
 	\end{itemize}
+	And objects with the same id also form a trajectory.
 
-	\vspace{-8pt}
+	\quad
+
+	A {\bf metric} here is used to measure the difference between
+	ground-truths and the predictions (hypotheses).
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{To Evaluate a Tracker}
+
+	We think a tracker is {\bf good} if
+	\emph{the ids it assigns to the same objects are consistent in different frames}.
+	However, this is also based on the performance of its detection part.
 
 	\begin{figure}
 		\begin{subfigure}{.48\textwidth}
@@ -131,95 +149,60 @@
 		\begin{subfigure}{.48\textwidth}
 		\includegraphics[width=150pt]{pics/track04.jpg}
 		\end{subfigure}
-		\caption{{\color{red}\bf [NG cases]} Fail to track the id 2. Wrong detection (the id 5).}
+		\caption{{\color{red}\bf [NG cases]} Fail to track the id 2.
+			Wrong detection on the id 5.}
 	\end{figure}
 
-	\vspace{-15pt}
-	To see if the predictions are correct, we match objects to the ground-truth
-	and see further if they are correctly tracked.
+	To see the consistence, we firstly match detections to the ground-truths
+	and see further if objects and ids are correctly tracked.
 
 \end{frame}
 
 \section{Matchings and Associations}
 
 \begin{frame}
-	\frametitle{Matching / Association in Different Levels}
-			
-	% To compare the results, we need to match the new ids
-	% with the original ids.
-		
-	\vspace{4pt}
-			
-	The matchings are executed in different levels such as:
-	\begin{itemize}
-		\item {\bf matching in detection levels}:
-		      match ground-truth objects (gtDets)
-		      with predictions (prDets) frame by frame.
-		\item {\bf matching in trajectory levels}:
-		      match each \emph{ground-truth id} to a \emph{hypothesis id}
-			  along a sequence of frames.
-		\item {\bf associations of trajectories}:
-		      associate all ground-truth ids with several non-overlapping preditive trajectories.
-	\end{itemize}
-		
-	% To give some partial credits to some peices of trajectories,
-	% we may also associate the ground-truth ids with preditive ids (not 1-1 relation).
-
-	% The ids are nominal values. 
-	% Ground-truth ids may not have any coincidence with the tracker ids.
-	All these kinds of matchings can be done according to some pre-defined \emph{similarity scores}.
-	Furthremore, there may have many possibilities of matchings.
-			
-\end{frame}
-
-\subsection{Matching in Detection Levels \& MOTA}
-
-\begin{frame}
 	\frametitle{Matching in Detection Levels}
 			
-	% To perform matching, similarity scores of any ground-truth and any prediction
-	% are defined. For example, IoU and $\max\{1-\text{dist}, 0\}$ are often used,
-	% where dist is the central distance.
-	In detection levels, scoring functions such as $\max\{1-\text{dist}, 0\}$ or IoU
-	are often used to measure similarities, where dist is the central distance.
+	Matchings are done according to their {\bf similarity scores}.
+	
+	$\max\{1-\text{dist}, 0\}$ or IoU
+	are often used as scoring functions.
 			
-	\vspace{-10pt}
 	\begin{figure}
 		\includegraphics[width=150pt]{pics/fig2.png}
 		\caption{Matchings (1-1 relation), false positives and misses in consecutive frames.
 		Here the similarity is measured by the central distances.}
 	\end{figure}
-			
+
 \end{frame}
 
 \begin{frame}
-	\frametitle{Similarity Threshold and the Quantities TP, FN and FP}
+	\frametitle{Similarity Threshold and the Performance Measures}
 		
 	Denote the similarity function by $\mathcal S$.
-	To filter out bad matches, we may set a threshold $\alpha$.
+	To filter out bad matches, a threshold $\alpha$ is given.
 	Once a matching $\Pi_\alpha$ under threshold $\alpha$ is done, it satisfies
 	\[
 		\forall\ (g,p)\in\Pi_\alpha, ~ \mathcal S(g,p) \geq \alpha.
 	\]
-	Then we can define the quantities TP, FN, FP in detection levels.
+	Hence we can define the following measures in the detection level.
 	\begin{itemize}
-		\item TP: matched pairs in a matching $\Pi_\alpha$.
-		\item FP: non-matched predictions.
-		\item FN: non-matched ground-truths.
+		\item TP, TP$_\alpha$: matched pairs in a matching $\Pi_\alpha$.
+		\item FP, FP$_\alpha$: non-matched predictions.
+		\item FN, FN$_\alpha$: non-matched ground-truths.
 	\end{itemize}
-	Remark: there may be several matchings fulfilling the similarity threshold.
+	{\color{red} Remark: For an $\alpha$, there may be several matchings fulfilling this threshold.}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Notions}
+	\frametitle{Notations}
 			
 	\begin{itemize}
-		\item $F:=\{f_0, f_1, \ldots, f_{N-1}\}$: the set of frames.
 		\item A matching $\Pi$ can be a matching in a frame $f$ and specified by $\Pi^{(f)}$;
 		      or be a matching during all frames.
-		\item When $\Pi$ denotes a global matching, it is the union of all its sections:
-		      $\Pi = \cup_{f\in F}\Pi^{(f)}$.
-		\item Furthermore, once a collection $E$ is well-defined in each frame,
+		\item When $\Pi$ denotes a global matching of objects, it is the union of all its sections:
+		      $\Pi = \cup_{f\in F}\Pi^{(f)}$ ($F$ collection of all frames).
+		\item Furthermore, once a set $E$ is well-defined in each frame,
 		      we denote $E^{(f)}$ as the $f$-section, i.e. elements in frame $f$.
 		      		      		      
 	\end{itemize}
@@ -246,36 +229,17 @@
 		\text{prId}(p_j) \neq \text{gtId}(p_\ell).
 	\]
 	Actually, this is an \emph{id mismatch} occuring in frame $f+1$.
-	If two objects exchange their ids in new frame, then this is regarded as $2$
+	If two objects exchange their ids in new frame, then this is regarded as two
 	IDSW events.
 	\begin{figure}
 		\includegraphics[width=180pt]{pics/fig3.png}
-		\caption{The ids 3 \& 8 exchanges. 2 IDSW events.}
+		\caption{The ids 3 \& 8 exchanges. Two IDSW events.}
 	\end{figure}
 			    
 \end{frame}
 
 \begin{frame}
-	\frametitle{Tracking Accuracy: A First Meet.}
-
-	Usual tracking errors consist of:
-	\begin{itemize}
-	\item \emph{an id switch event}, or that
-	\item \emph{an object is out of detection}, or a \emph{wrong prediction}.
-	\end{itemize}
-
-	Here we introduce a metric MOTA (multiple obejct tracking accuracy)
-	to evaluate the tracker by calculating the number of errors:
-	\[
-		\text{MOTA} = 1 - \dfrac{|\text{FP}| + |\text{FN}| + |\text{IDSW}|}{|\text{gtDets}|}.
-	\]
-
-	The range of MOTA is $(-\infty,1]$. As FP, FN, IDSW increase, the MOTA value decrease.
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Discussion on MOTA}
+	\frametitle{IDSWs Caused by ID-Exchange and Losing Tracks}
 
 	\begin{figure}
 		\begin{subfigure}{.49\textwidth}
@@ -289,23 +253,50 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Tracking Accuracy: A First Meet.}
+
+	Now by utilizing measures introduced above,
+	we have a simple metric to evaluate the performance.
+	Instead of measuring the difference,
+	we'd like to use a `score` to present how good it is.
+
+	\vspace{3pt}
+
+	The tracking errors consist of:
+	\begin{itemize}
+	\item \emph{an id switch event}, or that
+	\item \emph{an object is out of detection}, or a \emph{wrong prediction}.
+	\end{itemize}
+
+	The MOTA (multiple object tracking accuracy) score is defined by
+	\[
+		\text{MOTA} = 1 - \dfrac{|\text{FP}| + |\text{FN}| + |\text{IDSW}|}{|\text{gtDets}|}.
+	\]
+	The range of MOTA is $(-\infty,1]$. As FP, FN, IDSW increase, the MOTA value decrease.
+
+\end{frame}
+
+
+\begin{frame}
 	\frametitle{Discussion on MOTA}
 
+	\begin{minipage}{50pt}
+		\begin{figure}
+			\includegraphics[width=50pt]{pics/question2.png}
+		\end{figure}
+	\end{minipage}
+	\begin{minipage}{250pt}
 	\begin{itemize}
-	\item During the matching process, which hypothesis id is matched to ground-truth id for most frames?
+	\item Which hypothesis id is matched to ground-truth id? for most frames?
 	\item When MOTA is much lower from $1$, we don't know either detectors or tracking result is worse.
 	\item Sometimes IDSW can't help distinguish the exchange of two ids or
 		losing and re-tracking an object with id.
 	\end{itemize}
+	\end{minipage}
 
-	\vspace{5pt}
+	\vspace{10pt}
 
 	In the following, matching in trajectory levels is investigated.
-	% \begin{itemize}
-	% \item The matching is also done according to similarity scores between trajectories.
-	% 	Again, there may be many possibilities.
-	% \item Similarity scores between trajectories still depend on matching in detection levels.
-	% \end{itemize}
 
 \end{frame}
 
@@ -328,17 +319,20 @@
 	\end{figure}
 
 	\vspace{-5pt}
-	Since one trajectory can be likely to match two or more trajectories,
-	the similarity scores between trajectories are defined
-	and they depend on the similarity scores in detection levels.
+
+	A trajectory-to-trajectory matching $\leftrightarrow$ A gtid-to-prid matching.
+	
+	\quad
+
+	To match trajectories, the similarity scores of trajectories are
+	measured by the similarities of detections.
 			
 \end{frame}
-
 
 \begin{frame}
 	\frametitle{Similarity of Trajectories}
 			
-	Similarity scores here are measured
+	Similarities are measured
 	by counting overlapping and the rest parts of each pair of trajectories.
 			
 	\vspace{5pt}
@@ -346,19 +340,22 @@
 	Let $\mathfrak g$, $\mathfrak p$ be a pair
 	and $\alpha$ be a (detection-) similarity threhold.
 	We can also define the analogues:
+
+	\vspace{5pt}
+
 	\begin{itemize}
-		\item $\mathcal{TP}$, $\mathcal{TP}_{\mathfrak g, \mathfrak p}$:
+		\item $\mathds{TP}$, $\mathds{TP}_{\mathfrak g, \mathfrak p}$:
 		      the overlapping part of $\mathfrak g$ and $\mathfrak p$.
 		      \[
-		      	\mathcal{TP} := \{(g,p)\ |\ 
+		      	\mathds{TP} := \{(g,p)\ |\ 
 		      	g\in\mathfrak g,~
 		      	p\in\mathfrak p,~
 		      	f_g=f_p,~ \mathcal S(g,p)\geq \alpha\}
 		      \]
-		\item $\mathcal{FP}$, $\mathcal{FP}_{\mathfrak g, \mathfrak p}$:
+		\item $\mathds{FP}$, $\mathds{FP}_{\mathfrak g, \mathfrak p}$:
 		      the non-matched predictions.
 		      \begin{align*}
-		      	\mathcal{FP} := & \{ p\in\mathfrak p\ |\ 
+		      	\mathds{FP} := & \{ p\in\mathfrak p\ |\ 
 		      	\nexists\ g\in\mathfrak g ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ f_g=f_p.\}
 		      \end{align*}
 	\end{itemize}
@@ -369,9 +366,9 @@
 	\frametitle{Similarity of Trajectories}
 			
 	\begin{itemize}
-		\item $\mathcal{FN}$, $\mathcal{FN}_{\mathfrak g, \mathfrak p}$: the non-matched ground-truth objects.
+		\item $\mathds{FN}$, $\mathds{FN}_{\mathfrak g, \mathfrak p}$: the non-matched ground-truth objects.
 		      \begin{align*}
-		      	\mathcal{FN} := & \{ g\in\mathfrak g\ |\ 
+		      	\mathds{FN} := & \{ g\in\mathfrak g\ |\ 
 		      	\nexists\ p\in\mathfrak p ~\suchthat~ \mathcal S(g,p)\geq\alpha,~ f_p=f_g.\}
 		      \end{align*}
 	\end{itemize}
@@ -379,18 +376,17 @@
 	The similarity of trajectories is defined by
 	\[
 		\mathcal S_{\rm tr}(\mathfrak g, \mathfrak p) :=
-		\dfrac{|\mathcal{TP}_{\mathfrak g,\mathfrak p}|}{
-			|\mathcal{TP}_{\mathfrak g,\mathfrak p}|+|\mathcal{FP}_{\mathfrak g,\mathfrak p}|+|\mathcal{FN}_{\mathfrak g,\mathfrak p}|
+		\dfrac{|\mathds{TP}_{\mathfrak g,\mathfrak p}|}{
+			|\mathds{TP}_{\mathfrak g,\mathfrak p}|+|\mathds{FP}_{\mathfrak g,\mathfrak p}|+|\mathds{FN}_{\mathfrak g,\mathfrak p}|
 		}
 	\]
-	where $|\cdot|$ here denotes the cardinality of a set.
 	Once the similarities are calculated,
 	the matching of trajectories can be done by Hungarian algorithms.
 \end{frame}
 
 
 \begin{frame}
-	\frametitle{Measures for Id Tracking: IDTP, IDFP, IDFN}
+	\frametitle{Performance Measures Focusing on IDs}
 			
 	Suppose a matching of trajectories are done and denoted by $\mathfrak P$,
 	we can define the performance measures as follows.
@@ -418,30 +414,27 @@
 		      non-matched predictions in matched pairs
 		      and all predictions in non-matched predictive trajectories.
 	\end{itemize}
+	\begin{align*}
+	\text{IDFP} := & \left\{ p\in\text{prDets}\ \left|\                                                
+	\mathcal S(g,p)<\alpha, \ 
+	\forall\ g\in\mathfrak g^{(f_p)},
+	(\mathfrak g,\mathfrak p)\in\mathfrak P.
+	\right.
+	\right\} \\
+					& \bigcup \left\{p \in \text{prDets}\ |\ \text{prTraj$(p)$ is not matched.}\right\} 
+	\end{align*}
 			    
 \end{frame}
 
 \begin{frame}
-	\frametitle{Measures for Id Tracking: IDTP, IDFP, IDFN}
-			    
-	\vspace{-10pt}
-		
-	\begin{align*}
-		\text{IDFP} := & \left\{ p\in\text{prDets}\ \left|\                                                
-		\mathcal S(g,p)<\alpha, \ 
-		\forall\ g\in\mathfrak g^{(f_p)},
-		(\mathfrak g,\mathfrak p)\in\mathfrak P.
-		\right.
-		\right\} \\
-		               & \bigcup \left\{p \in \text{prDets}\ |\ \text{prTraj$(p)$ is not matched.}\right\} 
-	\end{align*}
-			
-	\vspace{-10pt}
+	\frametitle{Performance Measures Focusing on IDs}
 	\begin{itemize}
 		\item IDFN:
 		      non-matched ground-truths in matched pairs and
 		      all ground-truths in non-matched ground-truth trajectories.
 	\end{itemize}
+
+	\vspace{-15pt}
 	\begin{align*}
 		\text{IDFN} := & \left\{ g\in\text{gtDets}\ \left|\                                                
 		\mathcal S(g,p)<\alpha, \ 
@@ -451,44 +444,77 @@
 		\right\} \\
 		               & \bigcup \left\{g \in \text{gtDets}\ |\ \text{gtTraj$(g)$ is not matched}\right\}. 
 	\end{align*}
-	Later we'll see these terms in the definitions of metrics.
+	
+	By these quantities, the id-matchings can be evaluated by
+	\[
+		\text{ID-Precision} := \dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFP}|},
+		\quad
+		\text{ID-Recall} := \dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFN}|},
+	\]
+
+	\vspace{-10pt}
+	\[
+		\text{IDF1} := \dfrac{|\text{IDTP}|}{|\text{IDTP}| + 0.5|\text{IDFP}| + 0.5|\text{IDFN}|}.
+	\]
 \end{frame}
 
-% \subsection{Associations of Tracked Ids}
+\begin{frame}
+	\frametitle{Discussion on the ID-Metrics}
+			
+	By observations, the id-metrics show how good the trackings are.
+
+	\quad
+
+	But once if several fragmentations occur in different frames,
+	then we cannot not distinguish this case with the mostly lost cases.
+
+	\vspace{5pt}
+			
+	\begin{figure}
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[width=120pt]{pics/fig6.png}
+		\end{subfigure}%
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[width=120pt]{pics/fig7.png}
+		\end{subfigure}
+		\caption{The id metrics only measure tracking results of matched peices.
+		The ground-truth id is shown by the bold line.}
+	\end{figure}
+			
+\end{frame}
 
 \begin{frame}
 	\frametitle{Problems in Matching Trajectories}
 			
 	\begin{itemize}
 		\item {\bf fragmentations}:
-		      A ground-turth trajectory is tracked by
+		      A ground-turth trajectory is matched by
 		      several predictive trajectories.
 		\item {\bf merge}:
-		      A tracker is matched to several ground-truths.
+		      A hypothetical trajectory is matched to several ground-truths.
 	\end{itemize}
-		
+	
+	\vspace{-15pt}
 	\begin{figure}
-		\includegraphics[width=100pt]{pics/fig9.png}
-		\caption{Six objects with colors being diff. ids and dash lines being misses.}
+		\includegraphics[width=140pt]{pics/fig9.png}
+		\caption{Six objects. Colored segm's are diff. ids and dash lines are misses.}
 	\end{figure}
 		
 	\vspace{-15pt}
 	It's a drawback that trajectory matching only allows 1-1 relation.
-	% Hence in the following, we have some quantities to measure
-	% the overlapping of trajectories in the detection levels.
-	% This aims to give some partial credits to non-matched good trackers.
 			
 \end{frame}
 
 \begin{frame}
 	\frametitle{Measures for Associations of Objects}
 			
-	By concepts in trajectory / id matchings,
-	{\bf tracking associations of an single object} is developed in further.
+	By concepts in id-matchings,
+	{\bf tracking associations of a single object} is developed in further.
 	\emph{Do matching in detection levels and associate multiple ids by matching.}
-	% {\color{red} Here the TP's, FP's and FN's are determined in framewise detection levels.}
 			
-	\vspace{4pt}
+	\vspace{5pt}
 			
 	Given a framewise matching $\Pi_\alpha$.
 	Let $c = (g,p)$ be a TP pair in a frame $t$.
@@ -502,7 +528,7 @@
 		\end{array}\right.                     
 		\right\}.                              
 	\end{align*}
-	Note that $|\text{TPA}(c)|$ is just the number of frames that $\text{gtTraj}(g)$
+	Note that $|\text{TPA}(c)|$ is also the number of frames that $\text{gtTraj}(g)$
 	and $\text{prTraj}(p)$ overlap.
 			
 \end{frame}
@@ -537,55 +563,72 @@
 		\text{gtId}(g_i) = \text{gtId}(g)
 		\Big\}.
 	\end{align*}
-	Note that $\text{FPA}(c)$ and $\text{FNA}(c)$ relate to the non-matched or id-mismatched
-	objects in $\text{prTraj}(p)$ and $\text{grTraj}(g)$.
-		
-	Later we'll see these terms in the definitions of HOTA metrics.
+	Note that $\text{FPA}(c)$ and $\text{FNA}(c)$ relate to the non-matched
+	or id-mismatched objects in $\text{prTraj}(p)$ and $\text{grTraj}(g)$.
 			
 \end{frame}
 
 \begin{frame}
-	\frametitle{Measures for Associations of Objects}
+	\frametitle{Tracking Accuracy of a Single Matched Pair}
+
+	Under a framewise matching, for a TP pair $c=(g,p)$,
+	the tracking accuracy of the id-matching $(\text{grId}(g), \text{prId}(p))$
+	is
+	\[
+		\mathcal A(c) := 
+		\dfrac{|\text{TPA}(c)|}{|\text{TPA}(c)|+|\text{FPA}(c)|+|\text{FNA}(c)|}.
+	\]
+	This value shows how good the association $(\text{grId}(g), \text{prId}(p))$ is.
+	And we can compare these accuracies calculated from different pairs
+	of id-matchings.
+
+	\vspace{5pt}
+
+	Better than the id-metrics, the tracking accuracy $\mathcal A$ gives
+	\emph{partial credits} on small peices of matched trajectories.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{An Example of Tracking Associations}
 	\begin{figure}
-		\includegraphics[width=220pt]{pics/fig8.png}
+		\includegraphics[width=240pt]{pics/fig8.png}
 		\caption{For the interested object (red box), TPA: 5; FPA: 4; FNA: 3.}
 	\end{figure}
 \end{frame}
 
-% \begin{frame}
-%     In the next section,
-%     we'll introduce metrics for measuring tracking results
-%     via the defined quantities.
-
-% \end{frame}
-
-\section{Evaluation Metrics for Measuring Tracking Results}
+\section{The Metrics}
 
 \begin{frame}
-	\frametitle{Metrics for Measuring Tracking Results}
+	\frametitle{Metrics for Evaluating Trackers}
 			
-	Performance of object trackings is based on the result of detections.
+	Again, we recall that \emph{performance of object trackings is based 
+	on the result of detections}.
 			
-	\quad 
-			
-	To measure the results, metrics often consists of the following aspects
+	\vspace{5pt}
+
+	In more details than before,
+	metrics often consists of the following aspects
 	\begin{itemize}
 		\item detection;%: measure accuracies of predictions
 		\item localization;%: measure accuracies of positions of correct predictions
 		\item association.%: measure accuracies of the correct associations of objects
 	\end{itemize}
-			    
+
+	In the following, we'll restate the definitions of the common used metrics
+	mentioned above carefully and introduce the HOTA metrics.
+
 \end{frame}
 
-\subsection{CLEAR-MOT: MOTA and MOTP}
+% \subsection{CLEAR-MOT: MOTA and MOTP}
 
 \begin{frame}
-	\frametitle{MOTA and MOTP}
+	\frametitle{CLEAR-MOT: MOTA and MOTP scores}
 			
 	% {\scriptsize\tt K. Bernardin \& R. Stiefelhagen, Evaluating Multiple Object Tracking Performance:%
 	% The CLEAR MOT Metrics.}
 			
-	Given a similarity threshold $\alpha$.
+	Given a similarity threshold $\alpha\in (0,1)$.
 			
 	\vspace{4pt}
 			
@@ -600,8 +643,8 @@
 			
 	\vspace{4pt}
 			
-	{\bf\color{blue} FN, FP terms affect the accuracy of detections.} \\
-	{\bf\color{olive} The IDSW term affects the accuracy of id-associations.}
+	{\bf\color{blue} The FN, FP term may stand for the accuracy of detections.} \\
+	{\bf\color{olive} The IDSW term may stands for the accuracy of associations.}
 			
 	\vspace{4pt}
 		
@@ -610,9 +653,9 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{CLEAR-MOT: MOTA and MOTP}
+	\frametitle{CLEAR-MOT: MOTA and MOTP scores}
 			
-	As MOTA is achieved by some matching $\Pi_\alpha$, {\bf MOTP (multiple object tracking precision)}
+	As the MOTA score is achieved by some matching $\Pi_\alpha$, {\bf MOTP (multiple object tracking precision)}
 	is calculated as follows:
 	\[
 		\text{MOTP}_\alpha =
@@ -622,7 +665,7 @@
 			
 	\vspace{4pt}
 			
-	By direct observations, if the MOTA value is low,
+	As mentioned before, if the MOTA value is low,
 	then somehow it cannot be distinguished that
 	the detections are not good or the tracking results are not good.
 			
@@ -630,70 +673,46 @@
 		
 	$\alpha\nearrow$ $\Rightarrow$ $|\text{FN}|, |\text{FP}|, \mathcal S \nearrow$, $|\text{TP}| \searrow$ $\Rightarrow$ MOTP $\nearrow$.
 	$|\text{IDSW}|, \text{MOTA}$ $?$
-		
-			
-			
+	
 \end{frame}
-
-\subsection{Performance Measures for MTMCT: the ID Metrics}
 
 \begin{frame}
 	\frametitle{The ID Metrics}
 			
-	As a measure for the {\bf MTMCT (multi-target, multi-camera tracking)} tasks,
-	the id metrics focus on matching of trajectories.
+
+	The id metrics focus on matching of trajectories.
 			
-	\quad 
+	\vspace{5pt}
 			
-	Under a similarity threshold $\alpha$, the scoring functions are calculated through optimizing
-	the quantity $|\text{IDTP}|$ by matching in sequence-levels as follows:
+	Under a similarity threshold $\alpha$, the scoring functions are calculated
+	through optimizing the quantity $|\text{IDTP}|$ among matchings $\mathfrak P$
+	in trajectory level as follows:
 	\begin{align*}
 		\text{ID-Precision} := & ~ \max_{\mathfrak P} \dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFP}|}, \\
 		\text{ID-Recall} :=    & ~ \max_{\mathfrak P}\dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFN}|},  \\
 		\text{IDF1} :=         &                                                                            
 		~ \max_{\mathfrak P}\dfrac{|\text{IDTP}|}{|\text{IDTP}| + 0.5|\text{IDFP}| + 0.5|\text{IDFN}|}.
 	\end{align*}
-			
-\end{frame}
 
-\begin{frame}
-	\frametitle{The ID Metrics}
-			
-	By direct observations, these id metrics show how good the whole tracking trajectories are.
-	But once if several fragmentations occur in different frames,
-	then we cannot not distinguish this case with the mostly lost cases.
-			
-	\begin{figure}
-		\begin{subfigure}{.5\textwidth}
-			\centering
-			\includegraphics[width=120pt]{pics/fig6.png}
-		\end{subfigure}%
-		\begin{subfigure}{.5\textwidth}
-			\centering
-			\includegraphics[width=120pt]{pics/fig7.png}
-		\end{subfigure}
-		\caption{The id metrics only measure tracking results of matched peices.
-		The ground-truth id is shown by the bold line.}
-	\end{figure}
-			
-\end{frame}
+	$\alpha\nearrow$ $\Rightarrow$ $|\text{IDTP}|\searrow$,
+	$|\text{IDFP}|$, $|\text{IDFN}|$ ID-Precision, ID-Recall, ID-F1 $?$
 
-\subsection{Higher Order Tracking Accuracy: the HOTA metrics}
+\end{frame}
 
 \begin{frame}
 	\frametitle{The HOTA metrics}
 		
-	The HOTA score for a particular similarity threshold $\alpha$ is defined by
-	optimizing the following value among matchings in detection levels:
+	The {\bf HOTA (higher order tracking accuracy)} score for a threshold $\alpha$ is defined by
+	optimizing the following value among matchings in the detection level:
 	\[
 		\text{HOTA}_\alpha := 
 		\max_{\Pi_\alpha} \sqrt{\dfrac{\sum_{c\in\text{TP}} \mathcal A(c) }{|\text{TP}|+|\text{FN}|+|\text{FP}|}},
 	\]
-	where $\mathcal A(c)$ is the {\bf association score of a single pair of ids}:
+	where $\mathcal A(c)$ is defined by
 	\[
 		\mathcal A(c) = \dfrac{|\text{TPA}(c)|}{|\text{TPA}(c)|+|\text{FPA}(c)|+|\text{FNA}(c)|}.
 	\]
-	Note that the quantities TP, FP, FN, TPA, FPA, FNA also depend on matching $\Pi_\alpha$.
+	Note that all measures TP, FP, FN, TPA, FPA, FNA depend on matching $\Pi_\alpha$.
 		
 \end{frame}
 
@@ -710,13 +729,14 @@
 	\[
 		\text{HOTA}_\alpha = \sqrt{\text{AssA}_\alpha \cdot \text{Det}_\alpha}.
 	\]
-	The two scores indicate the accuracy of tracking associations and the accuracy of detections.
+	The two scores indicate the \emph{accuracy of tracking associations}
+	and the \emph{accuracy of detections}.
 \end{frame}
 
 \begin{frame}
 	\frametitle{The HOTA metrics}
 		
-	In the same time, by the same matching $\Pi_\alpha$,
+	Similarly to MOTP, by the same matching $\Pi_\alpha$,
 	the localization score in HOTA is defined by
 	\[
 		\text{Loc}_\alpha = \dfrac{\sum_{c\in\text{TP}} \mathcal S(c)}{|\text{TP}|}.
@@ -731,199 +751,199 @@
 		
 \end{frame}
 
-\section{Implementation of HOTA metrics}
+% \section{Implementation of HOTA metrics}
 
-\subsection{Obtain the Optimization Matching}
+% \subsection{Obtain the Optimization Matching}
 
-\begin{frame}
-	\frametitle{Matching to Optimize HOTA scores}
+% \begin{frame}
+% 	\frametitle{Matching to Optimize HOTA scores}
 	
-	The optimization is done by a Hungarian algorithm for
-	\begin{itemize}
-		\item maximizing the number of TP pairs as the first priority;
-		\item and maximizing the mean of association scores
-		      as a second objective across the set of maximized TP pairs.
-	\end{itemize}
+% 	The optimization is done by a Hungarian algorithm for
+% 	\begin{itemize}
+% 		\item maximizing the number of TP pairs as the first priority;
+% 		\item and maximizing the mean of association scores
+% 		      as a second objective across the set of maximized TP pairs.
+% 	\end{itemize}
 	
-	To reduce time cost, this is fulfilled by the following scoring MS (match score) for
-	potential matches between each ground-truth object and prediction:
-	\[
-		\text{MS}(i,j) =
-		\begin{cases}
-			1/\epsilon + \mathcal A_{\rm max}(i,j) + \epsilon\mathcal S(i,j), & \mathcal S(i,j) \geq \alpha; \\
-			0,                                                                & \text{otherwise}.            
-		\end{cases}
-	\]
+% 	To reduce time cost, this is fulfilled by the following scoring MS (match score) for
+% 	potential matches between each ground-truth object and prediction:
+% 	\[
+% 		\text{MS}(i,j) =
+% 		\begin{cases}
+% 			1/\epsilon + \mathcal A_{\rm max}(i,j) + \epsilon\mathcal S(i,j), & \mathcal S(i,j) \geq \alpha; \\
+% 			0,                                                                & \text{otherwise}.            
+% 		\end{cases}
+% 	\]
 	
-	\vspace{-5pt}
-	$\mathcal A_{\rm max}$ is a `proxy' for $\mathcal A$ (association score).
+% 	\vspace{-5pt}
+% 	$\mathcal A_{\rm max}$ is a `proxy' for $\mathcal A$ (association score).
 	
-\end{frame}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Matching to Optimize HOTA scores}
+% \begin{frame}
+% 	\frametitle{Matching to Optimize HOTA scores}
 	
-	Since the values TPA's, FNA's and FPA's of a TP pair depend on matching in other frames,
-	\emph{the optimizing matching can not be achieved by a linear assignment formulation}.
+% 	Since the values TPA's, FNA's and FPA's of a TP pair depend on matching in other frames,
+% 	\emph{the optimizing matching can not be achieved by a linear assignment formulation}.
 	
-	\vspace{5pt}
+% 	\vspace{5pt}
 	
-	This value is a reference for the optimizing matching and is calculated as follows.
-	\[
-		\mathcal A_{\rm max}(c) = 
-		\dfrac{|\text{TPA}_{\rm max}(c)|}{|\text{TPA}_{\rm max}(c)|+|\text{FNA}_{\rm min}(c)|+|\text{FPA}_{\rm min}(c)|}.
-	\]
-	Here the subscriptions mean to choose the possible maximum and minimum.
-	But in the codes provided by author of the HOTA metrics, 
-	they are just fractions like expectation values of matches.
+% 	This value is a reference for the optimizing matching and is calculated as follows.
+% 	\[
+% 		\mathcal A_{\rm max}(c) = 
+% 		\dfrac{|\text{TPA}_{\rm max}(c)|}{|\text{TPA}_{\rm max}(c)|+|\text{FNA}_{\rm min}(c)|+|\text{FPA}_{\rm min}(c)|}.
+% 	\]
+% 	Here the subscriptions mean to choose the possible maximum and minimum.
+% 	But in the codes provided by author of the HOTA metrics, 
+% 	they are just fractions like expectation values of matches.
 	
-\end{frame}
+% \end{frame}
 
-\subsection{The Algorithm Provided by the Author of HOTA metrics}
+% \subsection{The Algorithm Provided by the Author of HOTA metrics}
 
-\begin{frame}
-	\frametitle{The Official Calculation}
-	\begin{figure}
-		\includegraphics[width=280pt]{pics/fig10.png}
-		\caption{Calculation of the proxies of association scores.}
-	\end{figure}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{The Official Calculation}
+% 	\begin{figure}
+% 		\includegraphics[width=280pt]{pics/fig10.png}
+% 		\caption{Calculation of the proxies of association scores.}
+% 	\end{figure}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{The Official Calculation}
-	\begin{itemize}
-		\item IoU of similarities?
-		      \begin{align*}
-		      	\begin{bmatrix}	
-		      	0.8                       & 0                       & 0.1                     \\
-		      	0.5                       & 0.3                     & 0                       
-		      	\end{bmatrix}
-		      	\ \stackrel{\text{IoU}}{\Rightarrow}\ 
-		      	\begin{bmatrix}
-		      	\frac{0.8}{0.8+0+0.1+0.5} & 0                       & \frac{0.1}{0.8+0+0.1+0} \\
-		      	\frac{0.5}{0.8+0.5+0.3+0} & \frac{0.3}{0+0.5+0.3+0} & 0                       
-		      	\end{bmatrix} \\
-		      	\text{(possible matches count $\approx$ TPA)}~ \Rightarrow ~ 
-		      	\begin{bmatrix}
-		      	4/7                       & 0                       & 1/9                     \\
-		      	5/16                      & 3/8                     & 0                       
-		      	\end{bmatrix}
-		      \end{align*}
-		\item Add this into {\scriptsize\tt `potential\_matches\_count'} according to indices.
-		\item {\scriptsize\tt `gt\_id\_count'} and {\scriptsize\tt `track\_id\_count'} count
-		      the numbers of frames that the ids appear. Their sum equals to $\text{FPA}+\text{FNA}+2\text{TPA}$.
-		\item {\scriptsize\tt `global\_alignment\_score'}: the proxy value, approximation of $\mathcal A$.
+% \begin{frame}
+% 	\frametitle{The Official Calculation}
+% 	\begin{itemize}
+% 		\item IoU of similarities?
+% 		      \begin{align*}
+% 		      	\begin{bmatrix}	
+% 		      	0.8                       & 0                       & 0.1                     \\
+% 		      	0.5                       & 0.3                     & 0                       
+% 		      	\end{bmatrix}
+% 		      	\ \stackrel{\text{IoU}}{\Rightarrow}\ 
+% 		      	\begin{bmatrix}
+% 		      	\frac{0.8}{0.8+0+0.1+0.5} & 0                       & \frac{0.1}{0.8+0+0.1+0} \\
+% 		      	\frac{0.5}{0.8+0.5+0.3+0} & \frac{0.3}{0+0.5+0.3+0} & 0                       
+% 		      	\end{bmatrix} \\
+% 		      	\text{(possible matches count $\approx$ TPA)}~ \Rightarrow ~ 
+% 		      	\begin{bmatrix}
+% 		      	4/7                       & 0                       & 1/9                     \\
+% 		      	5/16                      & 3/8                     & 0                       
+% 		      	\end{bmatrix}
+% 		      \end{align*}
+% 		\item Add this into {\scriptsize\tt `potential\_matches\_count'} according to indices.
+% 		\item {\scriptsize\tt `gt\_id\_count'} and {\scriptsize\tt `track\_id\_count'} count
+% 		      the numbers of frames that the ids appear. Their sum equals to $\text{FPA}+\text{FNA}+2\text{TPA}$.
+% 		\item {\scriptsize\tt `global\_alignment\_score'}: the proxy value, approximation of $\mathcal A$.
 		      		
-	\end{itemize}
-\end{frame}
+% 	\end{itemize}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{The Official Calculation}
-	\begin{figure}
-		\includegraphics[width=280pt]{pics/fig11.png}
-		\caption{Perform matching by optimizing the proxy score weighted
-			by the local similarity via a Hungarian algorithm.}
-	\end{figure}
+% \begin{frame}
+% 	\frametitle{The Official Calculation}
+% 	\begin{figure}
+% 		\includegraphics[width=280pt]{pics/fig11.png}
+% 		\caption{Perform matching by optimizing the proxy score weighted
+% 			by the local similarity via a Hungarian algorithm.}
+% 	\end{figure}
 
-	\vspace{-15pt}
+% 	\vspace{-15pt}
 
-	Then calculate the association scores by the `actual matching'.
+% 	Then calculate the association scores by the `actual matching'.
 
-	\vspace{3pt}
+% 	\vspace{3pt}
 
-	By given similarity threshold $\alpha$,
-	\begin{itemize}
-	\item filter out matched pairs whose similarities less than $\alpha$;
-	\item calculate the $\text{HOTA}_\alpha$ score; and
-	\item calculate the $\text{LocA}_\alpha$ score.
-	\end{itemize}
+% 	By given similarity threshold $\alpha$,
+% 	\begin{itemize}
+% 	\item filter out matched pairs whose similarities less than $\alpha$;
+% 	\item calculate the $\text{HOTA}_\alpha$ score; and
+% 	\item calculate the $\text{LocA}_\alpha$ score.
+% 	\end{itemize}
 
-\end{frame}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{The Official Calculation: the Integration of HOTA scores}
+% \begin{frame}
+% 	\frametitle{The Official Calculation: the Integration of HOTA scores}
 
-	Besides of the localization score $\text{LocA}_\alpha$,
-	integration of $\text{HOTA}_\alpha$ scores in different $\alpha$'s
-	could also measure the performance of localization.
-	This integration can be approximated by evaluating $\text{HOTA}_\alpha$
-	for $\alpha$'s that partitions $[0,1]$.
-	That is,
-	\[
-		\int_0^1 \text{HOTA}_\alpha~ d\alpha ~ \approx ~ \dfrac{1}{19}\sum_{\alpha\in A} \text{HOTA}_\alpha
-	\]
-	where $A:=\{0.05, 0.1, 0.15, \cdots, 0.9, 0.95\}$.
+% 	Besides of the localization score $\text{LocA}_\alpha$,
+% 	integration of $\text{HOTA}_\alpha$ scores in different $\alpha$'s
+% 	could also measure the performance of localization.
+% 	This integration can be approximated by evaluating $\text{HOTA}_\alpha$
+% 	for $\alpha$'s that partitions $[0,1]$.
+% 	That is,
+% 	\[
+% 		\int_0^1 \text{HOTA}_\alpha~ d\alpha ~ \approx ~ \dfrac{1}{19}\sum_{\alpha\in A} \text{HOTA}_\alpha
+% 	\]
+% 	where $A:=\{0.05, 0.1, 0.15, \cdots, 0.9, 0.95\}$.
 
-\end{frame}
+% \end{frame}
 
-\subsection{Implementation in linker-metrics}
+% \subsection{Implementation in linker-metrics}
 
-\begin{frame}
-	\frametitle{Recall the Road Map of linker-metrics}
+% \begin{frame}
+% 	\frametitle{Recall the Road Map of linker-metrics}
 
-	\begin{figure}
-		\includegraphics[width=300pt]{pics/fig12.png}
-		\caption{runner $\to$ launcher $\to$ evaluator (calculation executor).}
-	\end{figure}
-\end{frame}
+% 	\begin{figure}
+% 		\includegraphics[width=300pt]{pics/fig12.png}
+% 		\caption{runner $\to$ launcher $\to$ evaluator (calculation executor).}
+% 	\end{figure}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Processing in linker-metrics}
+% \begin{frame}
+% 	\frametitle{Processing in linker-metrics}
 
-	\begin{figure}
-		\includegraphics[width=280pt]{pics/fig13.png}
-		\caption{linker-metrics uses config file to control the evaluation process.}
-	\end{figure}
+% 	\begin{figure}
+% 		\includegraphics[width=280pt]{pics/fig13.png}
+% 		\caption{linker-metrics uses config file to control the evaluation process.}
+% 	\end{figure}
 
-\end{frame}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Processing in linker-metrics}
-	\begin{figure}
-		\includegraphics[width=280pt]{pics/fig14.png}
-		\caption{The sequential instnace matcher use IoU Matcher as a pre-matcher.}
-	\end{figure}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{Processing in linker-metrics}
+% 	\begin{figure}
+% 		\includegraphics[width=280pt]{pics/fig14.png}
+% 		\caption{The sequential instnace matcher use IoU Matcher as a pre-matcher.}
+% 	\end{figure}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Calculation for HOTA scores}
+% \begin{frame}
+% 	\frametitle{Calculation for HOTA scores}
 
-	Each step in calculation of HOTA scores is performed by frame matcher, object matcher
-	and object calculator in linker-metrics.
+% 	Each step in calculation of HOTA scores is performed by frame matcher, object matcher
+% 	and object calculator in linker-metrics.
 
-	\begin{itemize}
-	\item The {\tt sequence-to-sequence matcher} parses the matched data sequentially.
+% 	\begin{itemize}
+% 	\item The {\tt sequence-to-sequence matcher} parses the matched data sequentially.
 
-	\item The object matcher {\tt sequential instances matcher} calculate the proxies
-		during a `pre-match' performed by the build-in pre-matcher (here uses {\tt IoU matcher}).
+% 	\item The object matcher {\tt sequential instances matcher} calculate the proxies
+% 		during a `pre-match' performed by the build-in pre-matcher (here uses {\tt IoU matcher}).
 
-	\item Then the object calculator {\tt HOTACalculator} calculate the HOTA scores
-		according to the actual matching returned by object matcher.
-	\end{itemize}
+% 	\item Then the object calculator {\tt HOTACalculator} calculate the HOTA scores
+% 		according to the actual matching returned by object matcher.
+% 	\end{itemize}
 
-\end{frame}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Take a Look on the Results}
-	\begin{figure}
-		\includegraphics[height=140pt]{pics/fig15.png}
-		\caption{HOTA in linker-metrics reports the statistics of every sequence and the result in total.}
-	\end{figure}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{Take a Look on the Results}
+% 	\begin{figure}
+% 		\includegraphics[height=140pt]{pics/fig15.png}
+% 		\caption{HOTA in linker-metrics reports the statistics of every sequence and the result in total.}
+% 	\end{figure}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Reference}
+% \begin{frame}
+% 	\frametitle{Reference}
 
-	\small
+% 	\small
 
-	\begin{itemize}
-	\item {\tt J. Luiten, A. O\u{s}ep, P. Dendorfer, P. Torr, A. Geiger \& L. Leal-Taix\'e},
-		\emph{HOTA: A Higher Order Metric for Evaluating Multi-object Tracking}, International Journal of Computer Vision (2021).
-	\item {\tt R. Kasturi, et al.},
-		\emph{Framework for Performance Evaluation of Face, Text, and Vehicle Detection and Tracking in Video:
-		Data, Metrics, and Protocol}, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-		Vol. 31, No. 2, Feb. 2009.
-	\end{itemize}
-\end{frame}
+% 	\begin{itemize}
+% 	\item {\tt J. Luiten, A. O\u{s}ep, P. Dendorfer, P. Torr, A. Geiger \& L. Leal-Taix\'e},
+% 		\emph{HOTA: A Higher Order Metric for Evaluating Multi-object Tracking}, International Journal of Computer Vision (2021).
+% 	\item {\tt R. Kasturi, et al.},
+% 		\emph{Framework for Performance Evaluation of Face, Text, and Vehicle Detection and Tracking in Video:
+% 		Data, Metrics, and Protocol}, IEEE Transactions on Pattern Analysis and Machine Intelligence,
+% 		Vol. 31, No. 2, Feb. 2009.
+% 	\end{itemize}
+% \end{frame}
 
 \end{document}
