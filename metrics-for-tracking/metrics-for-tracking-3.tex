@@ -572,19 +572,20 @@
 	\frametitle{Tracking Accuracy of a Single Matched Pair}
 
 	Under a framewise matching, for a TP pair $c=(g,p)$,
-	the tracking accuracy of the id-matching $(\text{grId}(g), \text{prId}(p))$
+	the accuracy of the association of the id-matching $(\text{grId}(g), \text{prId}(p))$
 	is
 	\[
 		\mathcal A(c) := 
 		\dfrac{|\text{TPA}(c)|}{|\text{TPA}(c)|+|\text{FPA}(c)|+|\text{FNA}(c)|}.
 	\]
-	This value shows how good the association $(\text{grId}(g), \text{prId}(p))$ is.
+	This value shows
+	\emph{how good the association $(\text{grId}(g), \text{prId}(p))$ is}.
 	And we can compare these accuracies calculated from different pairs
 	of id-matchings.
 
 	\vspace{5pt}
 
-	Better than the id-metrics, the tracking accuracy $\mathcal A$ gives
+	Comparing to the the id-metrics, such accuracy $\mathcal A$ gives
 	\emph{partial credits} on small peices of matched trajectories.
 
 \end{frame}
@@ -597,6 +598,26 @@
 	\end{figure}
 \end{frame}
 
+\begin{frame}
+	\frametitle{HOTA Scores: First Look}
+
+	The average AssA (accuracy of associations) is of this form:
+	\[
+		\text{AssA} = \dfrac{1}{|\text{TP}|} \sum_{c\in\text{TP}} \dfrac{|\text{TPA}(c)|}{|\text{TPA}(c)|+|\text{FPA}(c)|+|\text{FNA}(c)|}.
+	\]
+	DetA (accuracy of detection) can be calculated simultaneously
+	\[
+		\text{DetA} = \dfrac{|\text{TP}|}{|\text{TP}| +|\text{FP}| + |\text{FN}|}.
+	\]
+	Then the HOTA (higher order tracking accuracy) scores takes both
+	AssA and DetA into consideration comprehesively:
+	\[
+		\text{HOTA} = \sqrt{\text{AssA} \cdot \text{DetA}}.
+	\]
+	In the next section, we'll introduce these metrics more detailed.
+
+\end{frame}
+
 \section{The Metrics}
 
 \begin{frame}
@@ -607,16 +628,16 @@
 			
 	\vspace{5pt}
 
-	In more details than before,
-	metrics often consists of the following aspects
+	Metrics for evaluating trackers often concerns about the aspects:
 	\begin{itemize}
 		\item detection;%: measure accuracies of predictions
-		\item localization;%: measure accuracies of positions of correct predictions
+		\item localization; and%: measure accuracies of positions of correct predictions
 		\item association.%: measure accuracies of the correct associations of objects
 	\end{itemize}
 
-	In the following, we'll restate the definitions of the common used metrics
-	mentioned above carefully and introduce the HOTA metrics.
+	In the following, we'll carefully re-state the definitions of the
+	common used metrics
+	mentioned above and introduce the HOTA metrics.
 
 \end{frame}
 
@@ -643,8 +664,8 @@
 			
 	\vspace{4pt}
 			
-	{\bf\color{blue} The FN, FP term may stand for the accuracy of detections.} \\
-	{\bf\color{olive} The IDSW term may stands for the accuracy of associations.}
+	\emph{\color{blue} The FN, FP term may stand for the accuracy of detections.} \\
+	\emph{\color{olive} The IDSW term may stands for the accuracy of associations.}
 			
 	\vspace{4pt}
 		
@@ -661,9 +682,9 @@
 		\text{MOTP}_\alpha =
 		\dfrac{\sum_{(g,p)\in\text{TP}_{\Pi_\alpha}}\mathcal S(g,p)}{|\text{TP}_{\Pi_\alpha}|}.
 	\]
-	{\bf\color{red} MOTP measures the accuracy of localizations of predictions}.
+	\emph{\color{red} MOTP measures the accuracy of localizations of detections}.
 			
-	\vspace{4pt}
+	\quad
 			
 	As mentioned before, if the MOTA value is low,
 	then somehow it cannot be distinguished that
@@ -671,7 +692,8 @@
 			
 	\vspace{5pt}
 		
-	$\alpha\nearrow$ $\Rightarrow$ $|\text{FN}|, |\text{FP}|, \mathcal S \nearrow$, $|\text{TP}| \searrow$ $\Rightarrow$ MOTP $\nearrow$.
+	$\alpha\nearrow$ $\Rightarrow$ $|\text{FN}|, |\text{FP}|, \mathcal S \nearrow$,
+	$|\text{TP}| \searrow$ $\Rightarrow$ MOTP $\nearrow$.
 	$|\text{IDSW}|, \text{MOTA}$ $?$
 	
 \end{frame}
@@ -679,20 +701,22 @@
 \begin{frame}
 	\frametitle{The ID Metrics}
 			
-
-	The id metrics focus on matching of trajectories.
-			
-	\vspace{5pt}
-			
 	Under a similarity threshold $\alpha$, the scoring functions are calculated
-	through optimizing the quantity $|\text{IDTP}|$ among matchings $\mathfrak P$
+	through
+	\emph{optimizing the quantity $|\text{IDTP}|$ among matchings $\mathfrak P$}
 	in trajectory level as follows:
+
+	\vspace{-15pt}
 	\begin{align*}
 		\text{ID-Precision} := & ~ \max_{\mathfrak P} \dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFP}|}, \\
 		\text{ID-Recall} :=    & ~ \max_{\mathfrak P}\dfrac{|\text{IDTP}|}{|\text{IDTP}| + |\text{IDFN}|},  \\
 		\text{IDF1} :=         &                                                                            
 		~ \max_{\mathfrak P}\dfrac{|\text{IDTP}|}{|\text{IDTP}| + 0.5|\text{IDFP}| + 0.5|\text{IDFN}|}.
 	\end{align*}
+
+	Note that these metrics mainly focus on the {\color{olive}\emph{tracking accuracies}}.
+
+	\vspace{5pt}
 
 	$\alpha\nearrow$ $\Rightarrow$ $|\text{IDTP}|\searrow$,
 	$|\text{IDFP}|$, $|\text{IDFN}|$ ID-Precision, ID-Recall, ID-F1 $?$
@@ -725,225 +749,198 @@
 		\text{AssA}_\alpha = \dfrac{1}{|\text{TP}|} \sum_{c\in\text{TP}} \mathcal A(c), \ \ 
 		\text{Det}_\alpha = \dfrac{|\text{TP}|}{|\text{TP}| + |\text{FP}| + |\text{FN}|}.
 	\]
-	Then we have the formula:
+	Then we can recall the formula:
 	\[
 		\text{HOTA}_\alpha = \sqrt{\text{AssA}_\alpha \cdot \text{Det}_\alpha}.
 	\]
-	The two scores indicate the \emph{accuracy of tracking associations}
-	and the \emph{accuracy of detections}.
+	The two scores indicate the {\color{olive}\emph{accuracy of tracking associations}}
+	and the {\color{blue}\emph{accuracy of detections}}.
 \end{frame}
 
 \begin{frame}
 	\frametitle{The HOTA metrics}
 		
 	Similarly to MOTP, by the same matching $\Pi_\alpha$,
-	the localization score in HOTA is defined by
+	the \emph{\color{red} localization score} in HOTA is defined by
 	\[
-		\text{Loc}_\alpha = \dfrac{\sum_{c\in\text{TP}} \mathcal S(c)}{|\text{TP}|}.
+		\text{LocA}_\alpha = \dfrac{\sum_{c\in\text{TP}} \mathcal S(c)}{|\text{TP}|}.
 	\]
-	As a remark, $\text{AssA}_\alpha$ and $\text{Loc}_\alpha$ are not well-defined
+	As a remark, $\text{AssA}_\alpha$ and $\text{LocA}_\alpha$ are not well-defined
 	if $\text{TP} = \emptyset$.
 
-	\vspace{4pt}
+	\quad
 
 	Furthermore, the numerator can be changed to another metric for evaluating localizations
 	(i.e. IoU, $\max\{1-\text{dist},0\}$, \ldots).
 		
 \end{frame}
 
+\begin{frame}
+	\frametitle{Matching During Calculation of HOTA scores}
+
+	Note that when apllying the CLEAR-MOT or the id-metrics,
+	the optimization among all matchings can be done by a greedy method.
+
+	\vspace{5pt}
+
+	For example, in MOTA score, the matching can be done frame-by-frame:
+	\begin{itemize}
+	\item We can optimize the number of TPs by a Hungarian algorithm.
+	\item Inside a frame, if a detection can be matched to more than one
+		ground-truth candidates, then we can choose one by looking up
+		matchings in the previous frame and trying to minimize $|\text{IDSW}|$.
+	\end{itemize}
+
+	However, there's no greedy algorithm for calculating HOTA scores.
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Matching During Calculation of HOTA scores}
+
+	The problem is that if we want to determine the matching in a frame,
+	the optimization should consider associations and matchings in other frames.
+
+	\vspace{5pt}
+
+	Hence as an alternative, we may do a {\bf pre-match}: that is, to calculate
+	the framewise similarity scores and numbers of possible 
+	association matches during all frames of all pairs of objects.
+
+	\vspace{5pt}
+
+	Then the approximate tracking accuracies $\mathcal A_{\rm max}$
+	of a pair $c=(g,p)$ is defined by
+	\[
+		\mathcal A_{\rm max}(c)
+		= \dfrac{\text{number of possible matches of $(g,p)$ during all frames}}{
+			\text{number of frames that gtId($g$) and prId($p$) appears}.
+		}
+	\]
+
+\end{frame}
+
+
 % \section{Implementation of HOTA metrics}
 
-% \subsection{Obtain the Optimization Matching}
+\begin{frame}
+	\frametitle{Possible Matches Counts}
 
-% \begin{frame}
-% 	\frametitle{Matching to Optimize HOTA scores}
+	Inside a frame, similarity scores of ground-truths and detections are given.
+	The {\bf possible matches counts} inside a frame
+	is calculated as an IoU, and seemed as the expectation values of matches.
+	\begin{align*}
+	\begin{bmatrix}	
+	0.8                       & 0                       & 0.1                     \\
+	0.5                       & 0.3                     & 0                       
+	\end{bmatrix}
+	\ \stackrel{\text{IoU}}{\Rightarrow}\ 
+	\begin{bmatrix}
+	\frac{0.8}{0.8+0+0.1+0.5} & 0                       & \frac{0.1}{0.8+0+0.1+0} \\
+	\frac{0.5}{0.8+0.5+0.3+0} & \frac{0.3}{0+0.5+0.3+0} & 0                       
+	\end{bmatrix} \\
+	\text{(possible matches count inside a frame)}~ \Rightarrow ~ 
+	\begin{bmatrix}
+	4/7                       & 0                       & 1/9                     \\
+	5/16                      & 3/8                     & 0                       
+	\end{bmatrix}
+	\end{align*}
+
+	Then the possible matches counts of all pairs of ground-truths and detections
+	are accumulated after computing the IoU of similarities during all frames.
+
+	Finally we can obtain $\mathcal A_{\rm max}(c)$ for
+	all $c\in\text{TP}$.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Actual Matching by Optimization $\mathcal A_{\rm max}$}
+
+	The actual matching is done by
+	optimizing the approximate score frame-by-frame.
+	\[
+		\Pi^{(f)} := 
+		\text{argmax}\left\{ \sum\limits_{c\in\text{TP}^{(f)}} \mathcal A_{\rm max}(c) \right\}.
+	\]
+
+	Then calculate the association scores by this `actual matching'.
+
+	\vspace{3pt}
+
+	From the paper author's code, for convenience, 
+	the matching under threshold $\alpha$ $\Pi_\alpha$ is done by
+	filter out matched pairs whose similarities less than $\alpha$.
+
+	\vspace{5pt}
+
+	Finally, the (approximate) HOTA$_\alpha$ and related scores
+	is obtained according to the matching.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{The Integrated HOTA Scores}
+
+	As mentioned before, when $\alpha\nearrow$,
+	the number of TP pairs may decrease while numbers of FP and FN may increase.
+	But we're not sure that
+	the measures in tracking associations are likely to increase or decrease.
+
+	\quad
+
+	Hence the integrated HOTA scores are measured in different levels of
+	similarity thresholds $\alpha$'s:
+	\begin{align*}
+		\text{HOTA} & = \int_0^1\text{HOTA}_\alpha\ d\alpha
+		~ \approx ~ \dfrac1{19}\sum_{\alpha_i\in\{0.05,\atop \ldots,0.95\}}
+		\text{HOTA}_{\alpha_i}. \\
+		\text{LocA} & = \int_0^1\text{LocA}_\alpha\ d\alpha
+		~ \approx ~ \dfrac1{19}\sum_{\alpha_i\in\{0.05,\atop \ldots,0.95\}}
+		\text{LocA}_{\alpha_i}.
+	\end{align*}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Drawback of HOTA metrics}
 	
-% 	The optimization is done by a Hungarian algorithm for
-% 	\begin{itemize}
-% 		\item maximizing the number of TP pairs as the first priority;
-% 		\item and maximizing the mean of association scores
-% 		      as a second objective across the set of maximized TP pairs.
-% 	\end{itemize}
-	
-% 	To reduce time cost, this is fulfilled by the following scoring MS (match score) for
-% 	potential matches between each ground-truth object and prediction:
-% 	\[
-% 		\text{MS}(i,j) =
-% 		\begin{cases}
-% 			1/\epsilon + \mathcal A_{\rm max}(i,j) + \epsilon\mathcal S(i,j), & \mathcal S(i,j) \geq \alpha; \\
-% 			0,                                                                & \text{otherwise}.            
-% 		\end{cases}
-% 	\]
-	
-% 	\vspace{-5pt}
-% 	$\mathcal A_{\rm max}$ is a `proxy' for $\mathcal A$ (association score).
-	
-% \end{frame}
+	\begin{itemize}
+	\item HOTA metrics can not deal with realtime tracking results
+		since it needs measures of global associations.
+	\item The accuracies of tracking associations can not distinguish
+		how long-lasting the tracker is.
+	\end{itemize}
 
-% \begin{frame}
-% 	\frametitle{Matching to Optimize HOTA scores}
-	
-% 	Since the values TPA's, FNA's and FPA's of a TP pair depend on matching in other frames,
-% 	\emph{the optimizing matching can not be achieved by a linear assignment formulation}.
-	
-% 	\vspace{5pt}
-	
-% 	This value is a reference for the optimizing matching and is calculated as follows.
-% 	\[
-% 		\mathcal A_{\rm max}(c) = 
-% 		\dfrac{|\text{TPA}_{\rm max}(c)|}{|\text{TPA}_{\rm max}(c)|+|\text{FNA}_{\rm min}(c)|+|\text{FPA}_{\rm min}(c)|}.
-% 	\]
-% 	Here the subscriptions mean to choose the possible maximum and minimum.
-% 	But in the codes provided by author of the HOTA metrics, 
-% 	they are just fractions like expectation values of matches.
-	
-% \end{frame}
+	\begin{figure}
+		\includegraphics[width=240pt]{pics/tracking05.png}
+		\caption{More fragmentations with the same HOTA scores.}
+	\end{figure}
 
-% \subsection{The Algorithm Provided by the Author of HOTA metrics}
+\end{frame}
 
-% \begin{frame}
-% 	\frametitle{The Official Calculation}
-% 	\begin{figure}
-% 		\includegraphics[width=280pt]{pics/fig10.png}
-% 		\caption{Calculation of the proxies of association scores.}
-% 	\end{figure}
-% \end{frame}
 
-% \begin{frame}
-% 	\frametitle{The Official Calculation}
-% 	\begin{itemize}
-% 		\item IoU of similarities?
-% 		      \begin{align*}
-% 		      	\begin{bmatrix}	
-% 		      	0.8                       & 0                       & 0.1                     \\
-% 		      	0.5                       & 0.3                     & 0                       
-% 		      	\end{bmatrix}
-% 		      	\ \stackrel{\text{IoU}}{\Rightarrow}\ 
-% 		      	\begin{bmatrix}
-% 		      	\frac{0.8}{0.8+0+0.1+0.5} & 0                       & \frac{0.1}{0.8+0+0.1+0} \\
-% 		      	\frac{0.5}{0.8+0.5+0.3+0} & \frac{0.3}{0+0.5+0.3+0} & 0                       
-% 		      	\end{bmatrix} \\
-% 		      	\text{(possible matches count $\approx$ TPA)}~ \Rightarrow ~ 
-% 		      	\begin{bmatrix}
-% 		      	4/7                       & 0                       & 1/9                     \\
-% 		      	5/16                      & 3/8                     & 0                       
-% 		      	\end{bmatrix}
-% 		      \end{align*}
-% 		\item Add this into {\scriptsize\tt `potential\_matches\_count'} according to indices.
-% 		\item {\scriptsize\tt `gt\_id\_count'} and {\scriptsize\tt `track\_id\_count'} count
-% 		      the numbers of frames that the ids appear. Their sum equals to $\text{FPA}+\text{FNA}+2\text{TPA}$.
-% 		\item {\scriptsize\tt `global\_alignment\_score'}: the proxy value, approximation of $\mathcal A$.
-		      		
-% 	\end{itemize}
-% \end{frame}
 
-% \begin{frame}
-% 	\frametitle{The Official Calculation}
-% 	\begin{figure}
-% 		\includegraphics[width=280pt]{pics/fig11.png}
-% 		\caption{Perform matching by optimizing the proxy score weighted
-% 			by the local similarity via a Hungarian algorithm.}
-% 	\end{figure}
+\begin{frame}
+	\frametitle{Reference}
 
-% 	\vspace{-15pt}
+	\scriptsize
 
-% 	Then calculate the association scores by the `actual matching'.
+	\begin{minipage}{190pt}
+	\begin{itemize}
+	\item {\sf J. Luiten, A. O\u{s}ep, P. Dendorfer, P. Torr, A. Geiger \& L. Leal-Taix\'e},
+		\emph{HOTA: A Higher Order Metric for Evaluating Multi-object Tracking}, International Journal of Computer Vision (2021).
+	\item {\sf R. Kasturi, et al.},
+		\emph{Framework for Performance Evaluation of Face, Text, and Vehicle Detection and Tracking in Video:
+		Data, Metrics, and Protocol}, IEEE Transactions on Pattern Analysis and Machine Intelligence,
+		Vol. 31, No. 2, Feb. 2009.
+	\end{itemize}
+	\end{minipage}
+	\begin{minipage}{110pt}
+		\begin{figure}
+			\includegraphics[width=110pt]{pics/thank_you.png}
+		\end{figure}
+	\end{minipage}
 
-% 	\vspace{3pt}
-
-% 	By given similarity threshold $\alpha$,
-% 	\begin{itemize}
-% 	\item filter out matched pairs whose similarities less than $\alpha$;
-% 	\item calculate the $\text{HOTA}_\alpha$ score; and
-% 	\item calculate the $\text{LocA}_\alpha$ score.
-% 	\end{itemize}
-
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{The Official Calculation: the Integration of HOTA scores}
-
-% 	Besides of the localization score $\text{LocA}_\alpha$,
-% 	integration of $\text{HOTA}_\alpha$ scores in different $\alpha$'s
-% 	could also measure the performance of localization.
-% 	This integration can be approximated by evaluating $\text{HOTA}_\alpha$
-% 	for $\alpha$'s that partitions $[0,1]$.
-% 	That is,
-% 	\[
-% 		\int_0^1 \text{HOTA}_\alpha~ d\alpha ~ \approx ~ \dfrac{1}{19}\sum_{\alpha\in A} \text{HOTA}_\alpha
-% 	\]
-% 	where $A:=\{0.05, 0.1, 0.15, \cdots, 0.9, 0.95\}$.
-
-% \end{frame}
-
-% \subsection{Implementation in linker-metrics}
-
-% \begin{frame}
-% 	\frametitle{Recall the Road Map of linker-metrics}
-
-% 	\begin{figure}
-% 		\includegraphics[width=300pt]{pics/fig12.png}
-% 		\caption{runner $\to$ launcher $\to$ evaluator (calculation executor).}
-% 	\end{figure}
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{Processing in linker-metrics}
-
-% 	\begin{figure}
-% 		\includegraphics[width=280pt]{pics/fig13.png}
-% 		\caption{linker-metrics uses config file to control the evaluation process.}
-% 	\end{figure}
-
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{Processing in linker-metrics}
-% 	\begin{figure}
-% 		\includegraphics[width=280pt]{pics/fig14.png}
-% 		\caption{The sequential instnace matcher use IoU Matcher as a pre-matcher.}
-% 	\end{figure}
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{Calculation for HOTA scores}
-
-% 	Each step in calculation of HOTA scores is performed by frame matcher, object matcher
-% 	and object calculator in linker-metrics.
-
-% 	\begin{itemize}
-% 	\item The {\tt sequence-to-sequence matcher} parses the matched data sequentially.
-
-% 	\item The object matcher {\tt sequential instances matcher} calculate the proxies
-% 		during a `pre-match' performed by the build-in pre-matcher (here uses {\tt IoU matcher}).
-
-% 	\item Then the object calculator {\tt HOTACalculator} calculate the HOTA scores
-% 		according to the actual matching returned by object matcher.
-% 	\end{itemize}
-
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{Take a Look on the Results}
-% 	\begin{figure}
-% 		\includegraphics[height=140pt]{pics/fig15.png}
-% 		\caption{HOTA in linker-metrics reports the statistics of every sequence and the result in total.}
-% 	\end{figure}
-% \end{frame}
-
-% \begin{frame}
-% 	\frametitle{Reference}
-
-% 	\small
-
-% 	\begin{itemize}
-% 	\item {\tt J. Luiten, A. O\u{s}ep, P. Dendorfer, P. Torr, A. Geiger \& L. Leal-Taix\'e},
-% 		\emph{HOTA: A Higher Order Metric for Evaluating Multi-object Tracking}, International Journal of Computer Vision (2021).
-% 	\item {\tt R. Kasturi, et al.},
-% 		\emph{Framework for Performance Evaluation of Face, Text, and Vehicle Detection and Tracking in Video:
-% 		Data, Metrics, and Protocol}, IEEE Transactions on Pattern Analysis and Machine Intelligence,
-% 		Vol. 31, No. 2, Feb. 2009.
-% 	\end{itemize}
-% \end{frame}
+\end{frame}
 
 \end{document}
