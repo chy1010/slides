@@ -57,6 +57,9 @@
 \end{frame}
 
 
+
+\section{Trackers and Multiple Object Tracking}
+
 \begin{frame}
 	\frametitle{What is a tracker?}
 
@@ -68,9 +71,10 @@
 	A tracker model is often used on MOT (multiple object tracking) tasks,
 	which consists of
 	\begin{itemize}
-	\item to detects objects inside each frames, and
 	\item
-		to recognizes if the detections in consecutive frames are the
+		to detect objects inside each frames, and
+	\item
+		to recognize if the detections in consecutive frames are the
 		same or not.
 	\end{itemize}
 
@@ -83,13 +87,13 @@
 \end{frame}
 
 
-\section{Trackers and Multiple Object Tracking}
 
 \begin{frame}
 	\frametitle{Inference Results of a Tracker}
 
 	Unlike SOT (single object tracking), MOT are mainly to deal with
-	multiple objects of the same category. And a tracker should assign
+	multiple objects of \underline{one category}.
+	And a tracker should assign
 	an identity to each detected object along a video file or a video
 	stream.
 
@@ -109,7 +113,7 @@
 
 	\begin{figure}
 		\includegraphics[height=90pt]{pics/fig1.png}
-		\caption{Trajectories and several un-tracked / isolated predictions.}
+		\caption{Trajectories and several un-tracked / isolated detections.}
 	\end{figure}
 
 \end{frame}
@@ -153,7 +157,7 @@
 			Wrong detection on the id 5.}
 	\end{figure}
 
-	To see the consistence, we firstly match detections to the ground-truths
+	To do this, we firstly match detections to the ground-truths
 	and see further if objects and ids are correctly tracked.
 
 \end{frame}
@@ -163,7 +167,7 @@
 \begin{frame}
 	\frametitle{Matching in Detection Levels}
 			
-	Matchings are done according to their {\bf similarity scores}.
+	The matchings are done according to their {\bf similarity scores}.
 	
 	$\max\{1-\text{dist}, 0\}$ or IoU
 	are often used as scoring functions.
@@ -229,8 +233,8 @@
 		\text{prId}(p_j) \neq \text{gtId}(p_\ell).
 	\]
 	Actually, this is an \emph{id mismatch} occuring in frame $f+1$.
-	If two objects exchange their ids in new frame, then this is regarded as two
-	IDSW events.
+	If two detections exchange their ids in a new frame,
+	then this is regarded as two IDSW events.
 	\begin{figure}
 		\includegraphics[width=180pt]{pics/fig3.png}
 		\caption{The ids 3 \& 8 exchanges. Two IDSW events.}
@@ -255,7 +259,7 @@
 \begin{frame}
 	\frametitle{Tracking Accuracy: A First Meet.}
 
-	Now by utilizing measures introduced above,
+	Now %by utilizing measures introduced above,
 	we have a simple metric to evaluate the performance.
 	Instead of measuring the difference,
 	we'd like to use a `score` to present how good it is.
@@ -276,6 +280,15 @@
 
 \end{frame}
 
+\begin{frame}
+	\frametitle{Example: MOTA score}
+
+	\begin{figure}
+		\includegraphics[width=200pt]{pics/fig16.png}
+		\caption{24 TP, 0 FP, 0 FN, 4 IDSW: MOTA $=1-4/24 = 5/6 \approx 83\%$.}
+	\end{figure}
+\end{frame}
+
 
 \begin{frame}
 	\frametitle{Discussion on MOTA}
@@ -287,7 +300,7 @@
 	\end{minipage}
 	\begin{minipage}{250pt}
 	\begin{itemize}
-	\item Which hypothesis id is matched to ground-truth id? for most frames?
+	% \item Which hypothesis id is matched to ground-truth id? for most frames?
 	\item When MOTA is much lower from $1$, we don't know either detectors or tracking result is worse.
 	\item Sometimes IDSW can't help distinguish the exchange of two ids or
 		losing and re-tracking an object with id.
@@ -296,7 +309,7 @@
 
 	\vspace{10pt}
 
-	In the following, matching in trajectory levels is investigated.
+	In the following, matching in a trajectory level is investigated.
 
 \end{frame}
 
@@ -332,8 +345,8 @@
 \begin{frame}
 	\frametitle{Similarity of Trajectories}
 			
-	Similarities are measured
-	by counting overlapping and the rest parts of each pair of trajectories.
+	For each pair of trajectories,
+	we can count the number of objects of the overlapping and the rest parts.
 			
 	\vspace{5pt}
 			
@@ -381,7 +394,7 @@
 		}
 	\]
 	Once the similarities are calculated,
-	the matching of trajectories can be done by Hungarian algorithms.
+	the matching of trajectories can be done by a Hungarian algorithms.
 \end{frame}
 
 
@@ -464,12 +477,7 @@
 	By observations, the id-metrics show how good the trackings are.
 
 	\quad
-
-	But once if several fragmentations occur in different frames,
-	then we cannot not distinguish this case with the mostly lost cases.
-
-	\vspace{5pt}
-			
+	
 	\begin{figure}
 		\begin{subfigure}{.5\textwidth}
 			\centering
@@ -479,10 +487,25 @@
 			\centering
 			\includegraphics[width=120pt]{pics/fig7.png}
 		\end{subfigure}
-		\caption{The id metrics only measure tracking results of matched peices.
-		The ground-truth id is shown by the bold line.}
+		% \caption{The id metrics only measure tracking results of matched peices.
+		% The ground-truth id is shown by the bold line.}
 	\end{figure}
-			
+	\begin{minipage}{150pt}
+	\begin{align*}
+		\text{IDTP} & = \{(g,p)\ |\ g\in A, p\in 1\}, \\
+		\text{IDFP} & = \{p\ |\ p\notin 1\}, \\
+		\text{IDFN} & = \{g\ |\ g\in A, \nexists\ p\in 1\},
+	\end{align*}
+	\end{minipage}
+	\begin{minipage}{130pt}
+		ID-Precision $=$ ID-Recall $=$ ID-F1 $\approx$ $0.75$.
+	\end{minipage}
+
+	\vspace{5pt}
+
+	But once if several fragmentations occur in different frames,
+	then we cannot not distinguish this case with the mostly lost cases.
+
 \end{frame}
 
 \begin{frame}
