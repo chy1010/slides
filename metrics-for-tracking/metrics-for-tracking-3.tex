@@ -611,8 +611,8 @@
 
 	\vspace{5pt}
 
-	Comparing to the the id-metrics, such accuracy $\mathcal A$ gives
-	\emph{partial credits} on small peices of matched trajectories.
+	Comparing to the id-metrics, such accuracy $\mathcal A$ gives
+	\emph{partial credits} on small peices of associated trajectories.
 
 \end{frame}
 
@@ -635,7 +635,7 @@
 	\[
 		\text{DetA} = \dfrac{|\text{TP}|}{|\text{TP}| +|\text{FP}| + |\text{FN}|}.
 	\]
-	Then the HOTA (higher order tracking accuracy) scores takes both
+	Then the HOTA (higher order tracking accuracy) score takes both
 	AssA and DetA into consideration comprehesively:
 	\[
 		\text{HOTA} = \sqrt{\text{AssA} \cdot \text{DetA}}.
@@ -675,17 +675,17 @@
 			
 	\vspace{5pt}
 
-	Hence {\bf metrics for evaluating tracker} should concern about the three aspects:
+	Hence {\bf metrics for evaluating trackers} should concern about the three aspects:
 	\begin{itemize}
 		\item detections;%: measure accuracies of detection
-		\item localizations; and%: measure accuracies of positions of correct predictions
-		\item associations.%: measure accuracies of the correct associations of objects
+		\item associations; and%: measure accuracies of positions of correct predictions
+		\item localizations.%: measure accuracies of the correct associations of objects
 	\end{itemize}
 
 	\quad
 
 	In the following, we'll re-state the definitions of the
-	metrics introduced before and see what's happen if the similarity threshold
+	metrics introduced before and see what's happened if the similarity threshold
 	varies.
 	
 
@@ -754,8 +754,7 @@
 \begin{frame}
 	\frametitle{The ID Metrics}
 			
-	Under a similarity threshold $\alpha$, the scoring functions are calculated
-	through
+	Under a similarity threshold $\alpha$, the id-metrics are calculated through
 	\emph{optimizing the quantity $|\text{IDTP}|$ among matchings $\mathfrak P$}
 	in trajectory level as follows:
 
@@ -800,11 +799,11 @@
 	Once the matching $\Pi$ is defined,
 	\[
 		\text{AssA}_\alpha = \dfrac{1}{|\text{TP}|} \sum_{c\in\text{TP}} \mathcal A(c), \ \ 
-		\text{Det}_\alpha = \dfrac{|\text{TP}|}{|\text{TP}| + |\text{FP}| + |\text{FN}|}.
+		\text{DetA}_\alpha = \dfrac{|\text{TP}|}{|\text{TP}| + |\text{FP}| + |\text{FN}|}.
 	\]
 	Then we can recall the formula:
 	\[
-		\text{HOTA}_\alpha = \sqrt{\text{AssA}_\alpha \cdot \text{Det}_\alpha}.
+		\text{HOTA}_\alpha = \sqrt{\text{AssA}_\alpha \cdot \text{DetA}_\alpha}.
 	\]
 	The two scores indicate the {\color{olive}\emph{accuracy of tracking associations}}
 	and the {\color{blue}\emph{accuracy of detections}}.
@@ -924,8 +923,8 @@
 	\vspace{3pt}
 
 	From the paper author's code, for convenience, 
-	the matching under threshold $\alpha$ $\Pi_\alpha$ is done by
-	filter out matched pairs whose similarities less than $\alpha$.
+	the matching under threshold $\alpha$, $\Pi_\alpha$, is done by
+	filter out matched pairs whose similarities are less than $\alpha$.
 
 	\vspace{5pt}
 
