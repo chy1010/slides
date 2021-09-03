@@ -1,4 +1,4 @@
-\documentclass[slidetop, mathserif]{beamer}
+\documentclass[slidetop, mathserif, dvipsnames]{beamer}
 
 % \mode<presentation>
 % {
@@ -10,6 +10,7 @@
 \usepackage{subcaption}
 \captionsetup{compatibility=false}
 
+% \usepackage[dvipsnames]{xcolor}
 
 \mode<presentation>{
 	\usetheme{Berlin}
@@ -490,14 +491,14 @@
 		% \caption{The id metrics only measure tracking results of matched peices.
 		% The ground-truth id is shown by the bold line.}
 	\end{figure}
-	\begin{minipage}{150pt}
+	\begin{minipage}{160pt}
 	\begin{align*}
 		\text{IDTP} & = \{(g,p)\ |\ g\in A, p\in 1\}, \\
 		\text{IDFP} & = \{p\ |\ p\notin 1\}, \\
-		\text{IDFN} & = \{g\ |\ g\in A, \nexists\ p\in 1\},
+		\text{IDFN} & = \{g\ |\ g\in A, ~ \nexists\ p\in 1\},
 	\end{align*}
 	\end{minipage}
-	\begin{minipage}{130pt}
+	\begin{minipage}{120pt}
 		ID-Precision $=$ ID-Recall $=$ ID-F1 $\approx$ $0.75$.
 	\end{minipage}
 
@@ -525,28 +526,30 @@
 		\caption{Six objects. Colored segm's are diff. ids and dash lines are misses.}
 	\end{figure}
 		
-	\vspace{-15pt}
-	It's a drawback that trajectory matching only allows 1-1 relation.
+	% \vspace{-15pt}
+	% It's a drawback that trajectory matching only allows 1-1 relation.
 			
 \end{frame}
 
 \begin{frame}
 	\frametitle{Measures for Associations of Objects}
 			
-	By concepts in id-matchings,
+	By concepts in id-metrics,
 	{\bf tracking associations of a single object} is developed in further.
-	\emph{Do matching in detection levels and associate multiple ids by matching.}
+	\emph{Do matching in a detection level and associate multiple ids during all
+	frames by matching.}
 			
 	\vspace{5pt}
 			
 	Given a framewise matching $\Pi_\alpha$.
-	Let $c = (g,p)$ be a TP pair in a frame $t$.
-	We define TPA, FPA and FNA as follows.
+	Let $c = (g,p)$ be a TP pair in a frame.
+	We define TPA (true positive associations), FPA (false positive associations)
+	and FNA (false negative associations) as follows.
 	\begin{align*}
 		\text{TPA}(c) :=                       
 		\left\{(g_i, p_j)\in\text{TP}\ \left|\ 
 		\begin{array}{c}                       
-		\text{grId}(g_i)=\text{grId}(g),       \\
+		\text{grId}(g_i)=\text{grId}(g), \\
 		\text{prId}(p_j) = \text{prId}(p)      
 		\end{array}\right.                     
 		\right\}.                              
@@ -637,7 +640,28 @@
 	\[
 		\text{HOTA} = \sqrt{\text{AssA} \cdot \text{DetA}}.
 	\]
-	In the next section, we'll introduce these metrics more detailed.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example: HOTA scores}
+
+	\begin{figure}
+		\includegraphics[width=240pt]{pics/track06.png}
+	\end{figure}
+
+	\vspace{-20pt}
+	TP: 8; FP: 5; FN: 3
+	\begin{itemize}
+	\item ({\color{MidnightBlue}BLUE}, black): TPA=5, FPA=1+3, FNA=2+1, $\mathcal A= 5/12$
+	\item ({\color{MidnightBlue}BLUE},\,\, {\color{gray}gray}): TPA=2, FPA=0+2, FNA=5+1, $\mathcal A=2/10$
+	\item ({\color{cyan}CYAN}, black): TPA=1, FPA=5+3, FNA=0+2, $\mathcal A=1/11$
+	\end{itemize}
+
+	\vspace{-10pt}
+	\[
+		\text{HOTA} = \sqrt{\dfrac{8}{8+5+3} \cdot \dfrac{5/12*5 + 2/10*2 + 1/11*1}{8}} \approx 40.1\%.
+	\]
 
 \end{frame}
 
@@ -651,16 +675,19 @@
 			
 	\vspace{5pt}
 
-	Metrics for evaluating trackers often concerns about the aspects:
+	Hence {\bf metrics for evaluating tracker} should concern about the three aspects:
 	\begin{itemize}
-		\item detection;%: measure accuracies of predictions
-		\item localization; and%: measure accuracies of positions of correct predictions
-		\item association.%: measure accuracies of the correct associations of objects
+		\item detections;%: measure accuracies of detection
+		\item localizations; and%: measure accuracies of positions of correct predictions
+		\item associations.%: measure accuracies of the correct associations of objects
 	\end{itemize}
 
-	In the following, we'll carefully re-state the definitions of the
-	common used metrics
-	mentioned above and introduce the HOTA metrics.
+	\quad
+
+	In the following, we'll re-state the definitions of the
+	metrics introduced before and see what's happen if the similarity threshold
+	varies.
+	
 
 \end{frame}
 
@@ -687,12 +714,12 @@
 			
 	\vspace{4pt}
 			
-	\emph{\color{blue} The FN, FP term may stand for the accuracy of detections.} \\
-	\emph{\color{olive} The IDSW term may stands for the accuracy of associations.}
+	\emph{\color{blue} The FN, FP term measure the accuracy of detections.} \\
+	\emph{\color{olive} The IDSW term measures the accuracy of associations.}
 			
 	\vspace{4pt}
 		
-	Remark: under $\alpha$, the matching is taken to optimize $|\text{TP}|$ as well.
+	% Remark: under $\alpha$, the matching is taken to optimize $|\text{TP}|$ as well.
 			
 \end{frame}
 
@@ -709,14 +736,17 @@
 			
 	\quad
 			
-	As mentioned before, if the MOTA value is low,
-	then somehow it cannot be distinguished that
-	the detections are not good or the tracking results are not good.
+	% As mentioned before, if the MOTA value is low,
+	% then somehow it cannot be distinguished that
+	% the detections are not good or the tracking results are not good.
 			
 	\vspace{5pt}
 		
 	$\alpha\nearrow$ $\Rightarrow$ $|\text{FN}|, |\text{FP}|, \mathcal S \nearrow$,
 	$|\text{TP}| \searrow$ $\Rightarrow$ MOTP $\nearrow$.
+
+	\vspace{5pt}
+
 	$|\text{IDSW}|, \text{MOTA}$ $?$
 	
 \end{frame}
@@ -801,12 +831,13 @@
 \begin{frame}
 	\frametitle{Matching During Calculation of HOTA scores}
 
-	Note that when apllying the CLEAR-MOT or the id-metrics,
+	Note that when applying the CLEAR-MOT or the id-metrics,
 	the optimization among all matchings can be done by a greedy method.
 
 	\vspace{5pt}
 
-	For example, in MOTA score, the matching can be done frame-by-frame:
+	For example, in MOTA score, the optimizing matching can be done
+	frame-by-frame:
 	\begin{itemize}
 	\item We can optimize the number of TPs by a Hungarian algorithm.
 	\item Inside a frame, if a detection can be matched to more than one
@@ -814,7 +845,7 @@
 		matchings in the previous frame and trying to minimize $|\text{IDSW}|$.
 	\end{itemize}
 
-	However, there's no greedy algorithm for calculating HOTA scores.
+	However, there's no greedy algorithms for calculating HOTA scores.
 	
 \end{frame}
 
@@ -822,22 +853,23 @@
 	\frametitle{Matching During Calculation of HOTA scores}
 
 	The problem is that if we want to determine the matching in a frame,
-	the optimization should consider associations and matchings in other frames.
+	the optimizing process in this frame should consider associations and matchings in other frames.
 
 	\vspace{5pt}
 
 	Hence as an alternative, we may do a {\bf pre-match}: that is, to calculate
-	the framewise similarity scores and numbers of possible 
-	association matches during all frames of all pairs of objects.
+	the framewise similarity scores and numbers of {\bf possible matches}
+	during all frames of all pairs of objects.
 
 	\vspace{5pt}
 
 	Then the approximate tracking accuracies $\mathcal A_{\rm max}$
-	of a pair $c=(g,p)$ is defined by
+	of a pair $c=(g,p)$ is calculated by TPA, FPA and FNA obtained from
+	the possible matches, i.e.
 	\[
-		\mathcal A_{\rm max}(c)
-		= \dfrac{\text{number of possible matches of $(g,p)$ during all frames}}{
-			\text{number of frames that gtId($g$) and prId($p$) appears}.
+		\mathcal A_{\rm max}(c) = 
+		\dfrac{\scriptsize\text{number of possible matches of gtId($g$) and prId($p$) during all frames}}{
+			\text{\scriptsize number of frames that gtId($g$) and prId($p$) appears}.
 		}
 	\]
 
@@ -935,7 +967,7 @@
 	\end{itemize}
 
 	\begin{figure}
-		\includegraphics[width=240pt]{pics/tracking05.png}
+		\includegraphics[width=240pt]{pics/track05.png}
 		\caption{More fragmentations with the same HOTA scores.}
 	\end{figure}
 
