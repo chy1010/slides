@@ -1,0 +1,66 @@
+\documentclass[slidetop, mathserif, dvipsnames]{beamer}
+
+% \mode<presentation>
+% {
+% 	\usetheme{Warsaw}
+% 	\setbeamercovered{transparent}
+% }
+
+% \usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+
+% \usepackage[dvipsnames]{xcolor}
+
+\mode<presentation>{
+	\usetheme{Berlin}
+	\setbeamercovered{transparent}
+	\usefonttheme{professionalfonts}
+}
+
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{mathrsfs,dsfont}
+
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\suchthat}{-\hspace{-10pt}\ni\hspace{-10pt}-}
+
+
+\AtBeginSection[]
+{
+   \begin{frame}
+       \tableofcontents[currentsection]
+   \end{frame}
+}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+%% want to use verbatim: \begin{frame}[fragile]
+
+\title[OTA]{Introdoction to Optimal Transport Assignments}
+\author[chy1010]{Chien, Hung-Yu}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\section[Outline]{}
+\begin{frame}
+	\frametitle{Outlines}
+	\tableofcontents
+\end{frame}
+
+
+
+\section{}
+
+
+
+\end{document}
