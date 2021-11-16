@@ -42,7 +42,7 @@
 %% want to use verbatim: \begin{frame}[fragile]
 
 \title[OTA]{Introdoction to Optimal Transport Assignments for Object Detection}
-\author[chy1010]{Chien, Hung-Yu}
+\author[chy1010]{Chien, Hung-Yu \\ \quad \\ {\tt hungyu@linkernetworks.com}}
 \date{\today}
 
 \begin{document}
@@ -77,7 +77,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Motivation}
+    \frametitle{Motivation of Label Assignments}
 
     \includegraphics[width=300pt]{pics/atss_paper.png}
 
@@ -120,12 +120,16 @@
     As focal loss try to alleviate the gradients from dominant easy samples,
     the core problem is still to sample training targets from the proposals:
     {\it To train, or not to train, that is the question.}
+
+    \quad
+
+    The assignment means to distribute the proposals to the 3 classes:
     \begin{itemize}
         \item positive samples: some object exists in this proposal.
             Need to train the classifier and regressor (anchor's offsets).
-        \item negative samples: no object, or belong to the background class.
-            Need to train the classifier to output 0 or the background class.
-        \item ignore samples: not involed in training process.
+        \item negative samples: no object, or belong to the background.
+            Need to train the classifier to output 0 or background.
+        \item ignored samples: not involed in training process.
     \end{itemize}
 
     Here we use `label assigment' to mention the association among
@@ -136,13 +140,13 @@
     \frametitle{Motivation}
 
     Back to the paper ATSS, they align the anchor-based (RetinaNet)
-    and anchor-fre (F-COS) detectors by adding the same tricks:
+    and anchor-free (F-COS) detectors by adding the same tricks:
 
     \begin{figure}
     \includegraphics[width=150pt]{pics/atss_compare.png}
     \end{figure}
 
-    Also, on each point of feature map, set $\#A=1$ means
+    On each point of feature map, set $\#A=1$ means
     to use only one single squared box to be an anchor.
     This is aim to compare an anchor point and an anchor box directly.
 
@@ -165,19 +169,23 @@
               or an `anchor point` (F-COS).
     \end{enumerate}
 
+    From the table in ATSS, we can see that the main difference
+    is the way to define positive and negative samples:
     \begin{figure}
     \includegraphics[width=150pt]{pics/atss_compare2.png}
     \end{figure}
-    From the table in ATSS, we can see that the main difference
-    is the way to define positive and negative samples.
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Motivation}
 
-    The MORAL is that {\bf it is important to choose training targets},
-    that is, to re-thinking about how to do the {\bf `label assignments'}.
+    The MORAL is that {\bf it is important to choose training targets}.
+
+    \quad 
+
+    And it is time to re-thinking about
+    how to do the {\bf `label assignments'}.
 
 \end{frame}
 
@@ -187,12 +195,12 @@
     \frametitle{Assignments for Anchor-based Detector}
 
     For anchor-based detectors, the selection of positive and negative samples
-    is often determined by the IoU of anchors and ground-truth objects.
+    is often determined by the IoU values of anchors and ground-truth objects.
 
     \begin{itemize}
-    \item RPN in Faster R-CNN uses $0.7$ and $0.3$ as the thresholds for positive
+    \item The RPN of Faster R-CNN uses $0.7$ and $0.3$ as the thresholds for positive
         and negative samples.
-    \item The R-CNN module uses $0.5$ as the pos/neg division.
+    \item The R-CNN module uses $0.5$ to do the pos/neg division.
     \end{itemize}
     This setting is widely used in Faster R-CNN's variants.
     % This kind of label assignments is proved effective and soon been adopted by
@@ -212,13 +220,13 @@
     On the other side, anchor-free detectors such as FCOS, Foveabox, and etc.,
     assign positive samples if the location of the anchor point 
     \begin{enumerate}
-    \item lies in a ground truth bounding box (F-COS);
+    \item lies in a ground truth bounding box (FCOS);
     \item or lies in a shrunk version of it (Foveabox, more centralized).
     \end{enumerate}
 
     \quad
 
-    Furthermore, for another stream of anchor-free models:
+    Except, for another stream of anchor-free models:
     CornerNet, CenterNet, and etc., these models view objects as a point or
     a set of keypoints and hence have distinct characteristics from other
     detectors. We will not discussed this kind of models here.
@@ -242,9 +250,9 @@
 
     \quad
 
-    FOr example, for every ground truth, {\bf ATSS} select $k$ anchors the most
+    For example, for every gt object, {\bf ATSS} select $k$ anchors the most
     close to it. And calculate the {\tt mean} and {\tt std} of IoU's of all
-    anchors and objects.
+    such anchors and their corresponding gt objects.
     Then use {\tt mean$+$std} as the new threshold.
 
 \end{frame}
@@ -253,16 +261,16 @@
     \frametitle{Further Idea for Label Assignment}
 
     Most of the label assignment methods explore the optimal assigning strategy
-    for indivisual ground truth objects. But this failing to
+    for indivisual ground truth objects. But this is failing to
     \underline{consider context information from a global perspective}.
 
     \quad
 
     DeTR is the first work that attempts to consider label assignment from
-    a global view. By using Hungarian algorithm,
+    a global view. By using a Hungarian algorithm,
     an optimal bipartite matching between predictions
-    and ground truth objects is made and the minimal loss in this iteration
-    is obtained.
+    and ground truth objects is made
+    and the minimal loss in a single training step is obtained.
 
     \quad
 
@@ -280,7 +288,7 @@
     \includegraphics[width=200pt]{pics/ota_motivation.png}
     \end{figure}
 
-    For this anchor-free detector, the anchor points which lie in the
+    For this anchor-free detector, the (red) anchor points which lie in the
     intersection of two ground truth boxes might be assigned as positive
     samples to only one ground-truth objects.
 
@@ -326,6 +334,7 @@
     
     The goal of this simplest OT problem is to find a {\bf transportation plan}
     $\pi^\star = \{\pi_{ij}\}$ to solve the minimization problem with constraints:
+    here $\pi_{ij}$ means to transport $\pi_{ij}$ units from $i$ to $j$.
     \[
         \min_\pi\left\{\sum_{i,j} c_{ij}\pi_{ij}\ \left|\ \sum_i \pi_{ij} = d_j,~ \sum_j \pi_{ij}=s_i,
         ~ \pi_{ij}\in\mathbb N\cup\{0\}\right.\right\}.
@@ -380,14 +389,14 @@
     \]
     Thus we have a cost matrix $C\in\mathbb R^{(m+1)n}$ with a supplying vector
     $s\in\mathbb R^{m+1}$ and a demanding vector $d\in\mathbb R^n$.
-    Aim to solve for an optimal transportation plan $\pi^\star$.
+    Now the goal is to solve for an optimal transportation plan $\pi^\star$.
 
 \end{frame}
 
 \begin{frame}
     \frametitle{Sinkhorn-Knopp Iteration}
 
-    For dense sampling of proposals, to solve for an optimal transportation
+    For dense sampling of proposals, to solve for such an optimal transportation
     induces a large linear programming problem.
 
     \quad
@@ -398,7 +407,7 @@
     \[
         \min_{\pi} \sum_{ij} \left[c_{ij}\pi_{ij} + \gamma E(\pi_{ij})\right]
     \]
-    where $E(x) = x(\log x-1)$ for $x \in [0,1]$.
+    where $E(x) = x(\log x-1)$ for $x \in [0,\infty)$.
     The hyper-parameter $\gamma$ is used to control the intensity
     of the regularization.
 
@@ -419,8 +428,8 @@
 \begin{frame}
     \frametitle{Sinkhorn-Knopp Iteration}
 
-    By the Lagrange multiplier method,
-    the constrained minimization problem
+    Now we apply the Lagrange multiplier method
+    to the constrained minimization problem:
     \begin{align*}
         \min_{\pi} \Big\{ & \sum_{i,~j} c_{ij}\pi_{ij}+\gamma E(\pi_{ij}) \\
             & + \sum_j \alpha_j\Big(\sum_i \pi_{ij} - d_j\Big)
@@ -457,7 +466,7 @@
         \end{cases}
     \]
     We solve the equations for $u_j$, $v_i$ (and then $\alpha_j$, $\beta_i$)
-    by the iterative scheme (which is just the {\bf Sinkhorn-Knopp Iteration}):
+    by the iterative scheme ({\bf Sinkhorn-Knopp Iteration}):
     \[
         u_j^{(t+1)} = \dfrac{d_j}{\sum_i M_{ij}v_i^{(t)}},~
         v_j^{(t+1)} = \dfrac{s_i}{\sum_j M_{ij}u_j^{(t)}}.
@@ -532,10 +541,10 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Thank you AsSign}
+    \frametitle{`Thank you` As-Sign}
 
     \begin{figure}
-        \includegraphics[width=140pt]{pics/thank-you-road-sign1.jpeg}
+        \includegraphics[width=250pt]{pics/thank-you-road-sign1.jpeg}
     \end{figure}
 
 \end{frame}
